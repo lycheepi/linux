@@ -230,6 +230,7 @@ struct imx_hdp {
 	int bpc;
 	VIC_PXL_ENCODING_FORMAT format;
 	bool hdr_metadata_present;
+	bool hdr_mode;
 };
 
 u32 imx_hdp_audio(AUDIO_TYPE type, u32 sample_rate, u32 channels, u32 width);
