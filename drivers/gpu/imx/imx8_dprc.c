@@ -197,16 +197,32 @@ static const struct dprc_format_info formats[] = {
 	  .depth = 16, .num_planes = 1, .cpp = { 2, 0, 0 },
 	  .hsub = 1,   .vsub = 1,
 	}, {
+	  .format = DRM_FORMAT_ARGB8888,
+	  .depth = 32, .num_planes = 1, .cpp = { 4, 0, 0 },
+	  .hsub = 1,   .vsub = 1,
+	}, {
 	  .format = DRM_FORMAT_XRGB8888,
 	  .depth = 24, .num_planes = 1, .cpp = { 4, 0, 0 },
+	  .hsub = 1,   .vsub = 1,
+	}, {
+	  .format = DRM_FORMAT_ABGR8888,
+	  .depth = 32, .num_planes = 1, .cpp = { 4, 0, 0 },
 	  .hsub = 1,   .vsub = 1,
 	}, {
 	  .format = DRM_FORMAT_XBGR8888,
 	  .depth = 24, .num_planes = 1, .cpp = { 4, 0, 0 },
 	  .hsub = 1,   .vsub = 1,
 	}, {
+	  .format = DRM_FORMAT_RGBA8888,
+	  .depth = 32, .num_planes = 1, .cpp = { 4, 0, 0 },
+	  .hsub = 1,   .vsub = 1,
+	}, {
 	  .format = DRM_FORMAT_RGBX8888,
 	  .depth = 24, .num_planes = 1, .cpp = { 4, 0, 0 },
+	  .hsub = 1,   .vsub = 1,
+	}, {
+	  .format = DRM_FORMAT_BGRA8888,
+	  .depth = 32, .num_planes = 1, .cpp = { 4, 0, 0 },
 	  .hsub = 1,   .vsub = 1,
 	}, {
 	  .format = DRM_FORMAT_BGRX8888,
@@ -472,9 +488,13 @@ void dprc_configure(struct dprc *dprc, unsigned int stream_id,
 	val |= BUF2;
 	val &= ~(PIX_COMP_SEL_MASK | PIX_SIZE);
 	switch (format) {
+	case DRM_FORMAT_ARGB8888:
 	case DRM_FORMAT_XRGB8888:
+	case DRM_FORMAT_ABGR8888:
 	case DRM_FORMAT_XBGR8888:
+	case DRM_FORMAT_RGBA8888:
 	case DRM_FORMAT_RGBX8888:
+	case DRM_FORMAT_BGRA8888:
 	case DRM_FORMAT_BGRX8888:
 		/*
 		 * It turns out pixel components are mapped directly
@@ -625,9 +645,13 @@ bool dprc_format_supported(struct dprc *dprc, u32 format, u64 modifier)
 		return false;
 
 	switch (format) {
+	case DRM_FORMAT_ARGB8888:
 	case DRM_FORMAT_XRGB8888:
+	case DRM_FORMAT_ABGR8888:
 	case DRM_FORMAT_XBGR8888:
+	case DRM_FORMAT_RGBA8888:
 	case DRM_FORMAT_RGBX8888:
+	case DRM_FORMAT_BGRA8888:
 	case DRM_FORMAT_BGRX8888:
 	case DRM_FORMAT_RGB565:
 		return (modifier == DRM_FORMAT_MOD_NONE ||
