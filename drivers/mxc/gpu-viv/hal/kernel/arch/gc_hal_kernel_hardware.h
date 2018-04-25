@@ -241,6 +241,7 @@ struct _gckHARDWARE
     gcsLISTHEAD                 mmuHead;
 
     gctPOINTER                  featureDatabase;
+    gctBOOL                     hasAsyncFe;
 
     gcsHARDWARE_SIGNATURE       signature;
 
