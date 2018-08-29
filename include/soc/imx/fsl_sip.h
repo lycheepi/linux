@@ -60,5 +60,11 @@
 
 #define FSL_SIP_NOC			0xc2000008
 #define FSL_SIP_NOC_LCDIF		0x0
+#define FSL_SIP_NOC_PRIORITY		0x1
+#define NOC_GPU_PRIORITY		0x10
+#define NOC_DCSS_PRIORITY		0x11
+#define NOC_VPU_PRIORITY		0x12
+#define NOC_CPU_PRIORITY		0x13
+#define NOC_MIX_PRIORITY		0x14
 
 #endif
