@@ -317,10 +317,8 @@ int __init imx8_mu_init(void)
 	}
 
 	err = irq_set_irq_wake(irq, 1);
-	if (err) {
+	if (err)
 		pr_info("set mu irq wake up error %d.\n", err);
-		return err;
-	}
 
 	if (!scu_mu_init) {
 		uint32_t i;
