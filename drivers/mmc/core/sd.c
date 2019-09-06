@@ -929,6 +929,21 @@ unsigned mmc_sd_get_max_clock(struct mmc_card *card)
 	return max_dtr;
 }
 
+#ifdef CONFIG_IWG27M
+/* IWG27M: Added UHS support for SD after reboot */
+static bool mmc_sd_card_using_v18(struct mmc_card *card)
+{
+       /*
+        * According to the SD spec., the Bus Speed Mode (function group 1) bits
+        * 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
+        * they can be used to determine if the card has already switched to
+        * 1.8V signaling.
+        */
+       return card->sw_caps.sd3_bus_mode &
+               (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
+}
+#endif
+
 /*
  * Handle the detection and initialisation of a card.
  *
@@ -942,8 +957,14 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 	int err;
 	u32 cid[4];
 	u32 rocr = 0;
+#ifdef CONFIG_IWG27M
+	bool v18_fixup_failed = false;
+#endif
 
 	WARN_ON(!host->claimed);
+#ifdef CONFIG_IWG27M
+retry:
+#endif
 
 	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
 	if (err)
@@ -1010,6 +1031,41 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 	if (err)
 		goto free_card;
 
+#ifdef CONFIG_IWG27M	
+	/*
+        * If the card has not been power cycled, it may still be using 1.8V
+        * signaling. Detect that situation and try to initialize a UHS-I (1.8V)
+        * transfer mode.
+        */
+       if (!v18_fixup_failed && !mmc_host_is_spi(host) && mmc_host_uhs(host) &&
+                       mmc_sd_card_using_v18(card) &&
+                       host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
+               /*
+                * Re-read switch information in case it has changed since
+                * oldcard was initialized.
+                */
+               if (oldcard) {
+                       err = mmc_read_switch(card);
+                       if (err)
+                               goto free_card;
+               }
+               if (mmc_sd_card_using_v18(card)) {
+                       if (mmc_host_set_uhs_voltage(host) ||
+                                       mmc_sd_init_uhs_card(card)) {
+                               v18_fixup_failed = true;
+                               host->card->ocr = ocr;
+                               mmc_power_cycle(host,host->card->ocr);
+                               if (!oldcard)
+                                       mmc_remove_card(card);
+                               goto retry;
+                       } 
+                       /* Card is an ultra-high-speed card */
+                       //mmc_card_set_uhs(card);
+                       goto done;
+               }
+       }
+#endif
+
 	/* Initialization sequence for UHS-I cards */
 	if (rocr & SD_ROCR_S18A) {
 		err = mmc_sd_init_uhs_card(card);
@@ -1042,6 +1098,9 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
 		}
 	}
+#ifdef CONFIG_IWG27M
+done:
+#endif
 
 	host->card = card;
 	return 0;

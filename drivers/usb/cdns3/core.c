@@ -30,6 +30,8 @@
 #include <linux/usb/phy.h>
 #include <linux/extcon.h>
 #include <linux/pm_runtime.h>
+#include <linux/of_gpio.h>
+#include <linux/gpio.h>
 
 #include "cdns3-nxp-reg-def.h"
 #include "core.h"
@@ -492,7 +494,8 @@ static int cdns3_probe(struct platform_device *pdev)
 	struct resource	*res;
 	struct cdns3 *cdns;
 	void __iomem *regs;
-	int ret;
+	int ret,rst_gpio;
+	struct device_node *np;
 
 	cdns = devm_kzalloc(dev, sizeof(*cdns), GFP_KERNEL);
 	if (!cdns)
@@ -546,6 +549,46 @@ static int cdns3_probe(struct platform_device *pdev)
 	if (IS_ERR(regs))
 		return PTR_ERR(regs);
 	cdns->otg_regs = regs;
+
+#ifdef CONFIG_IWG27M
+       /*IWG27M : Enabling USB Power Enable Regulator*/
+       np = of_find_compatible_node(NULL, NULL, "Cadence,usb3");       
+       cdns->reg_vusb = devm_regulator_get(dev, "vusb");
+       if (PTR_ERR(cdns->reg_vusb) == -EPROBE_DEFER) {
+               return -EPROBE_DEFER;
+       } else if (PTR_ERR(cdns->reg_vusb) == -ENODEV) {
+               /* no vusb regulator is needed */
+               cdns->reg_vusb = NULL;
+       } else if (IS_ERR(cdns->reg_vusb)) {
+               dev_err(dev, "Getting regulator error: %ld\n",
+                       PTR_ERR(cdns->reg_vusb));
+               return PTR_ERR(cdns->reg_vusb);
+       }
+       
+       ret = regulator_enable(cdns->reg_vusb);
+       if (ret) {
+               dev_err(cdns->dev,
+                       "Failed to enable vusb regulator, ret=%d\n", ret);
+               goto err0;
+       }
+       
+       /*IWG27M : Setting USB Hub Reset GPIO*/
+       rst_gpio = of_get_named_gpio(np, "hub-reset-gpio", 0);
+       if (gpio_is_valid(rst_gpio) &&
+                               !gpio_request_one(rst_gpio, GPIOF_DIR_OUT, "HUB_RESET")) {
+                       /*IWG27M: Setting GPIO value to low*/  
+                       gpio_set_value(rst_gpio, 0);
+       }
+       mdelay(10); 
+       ret = regulator_enable(cdns->reg_vusb);
+       if (ret) {
+	       dev_err(cdns->dev,
+			       "Failed to enable vusb regulator, ret=%d\n", ret);
+	       goto err0;
+       }
+       mdelay(10); 
+       gpio_set_value(rst_gpio, 1);
+#endif
 
 	ret = cdns3_get_clks(dev);
 	if (ret)
@@ -609,6 +652,8 @@ err2:
 	usb_phy_shutdown(cdns->usbphy);
 err1:
 	cdns3_disable_unprepare_clks(dev);
+err0:
+	regulator_disable(cdns->reg_vusb);
 	return ret;
 }
 
@@ -628,6 +673,7 @@ static int cdns3_remove(struct platform_device *pdev)
 	cdns3_remove_roles(cdns);
 	usb_phy_shutdown(cdns->usbphy);
 	cdns3_disable_unprepare_clks(&pdev->dev);
+	regulator_disable(cdns->reg_vusb);
 
 	return 0;
 }

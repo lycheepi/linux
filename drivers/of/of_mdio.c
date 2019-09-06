@@ -55,8 +55,21 @@ static void of_mdiobus_register_phy(struct mii_bus *mdio,
 
 	if (!is_c45 && !of_get_phy_id(child, &phy_id))
 		phy = phy_device_create(mdio, addr, phy_id, 0, NULL);
-	else
+	else {
+#ifdef CONFIG_IWG27M
+		/* IWG27M: Ethernet: Ethernet PHY detection added */
+		/* check for attached phy */
+		for (addr = 0; addr < PHY_MAX_ADDR; addr++) {
+			phy = get_phy_device(mdio, addr, is_c45);
+			if (!phy || IS_ERR(phy))
+				continue;
+			else
+				break;
+		}
+#else
 		phy = get_phy_device(mdio, addr, is_c45);
+#endif
+	}
 	if (IS_ERR(phy))
 		return;
 

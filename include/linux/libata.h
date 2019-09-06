@@ -1955,4 +1955,9 @@ static inline u8 ata_wait_idle(struct ata_port *ap)
 }
 #endif /* CONFIG_ATA_SFF */
 
+#ifdef CONFIG_IWG27M
+/* Added for SATA activity LED support */
+void imx8_iwg27m_sata_act_led_flip(int value);
+#endif 
+
 #endif /* __LINUX_LIBATA_H__ */

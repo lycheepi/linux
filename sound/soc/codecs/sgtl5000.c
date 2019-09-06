@@ -29,6 +29,14 @@
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
 #include <sound/initval.h>
+#ifdef CONFIG_IWG27M
+/* IWG27M: Audio: HeadPhone and Mic Detect Implementation */
+#include <linux/err.h>
+#include <linux/irq.h>
+#include <linux/io.h>
+#include <linux/of_gpio.h>
+#include <linux/gpio.h>
+#endif
 
 #include "sgtl5000.h"
 
@@ -73,6 +81,20 @@ static const struct reg_default sgtl5000_reg_defaults[] = {
 	{ SGTL5000_DAP_AVC_ATTACK,		0x0028 },
 	{ SGTL5000_DAP_AVC_DECAY,		0x0050 },
 };
+
+#ifdef CONFIG_IWG27M
+/* IWG27M: Audio: HeadPhone and Mic Detect Implementation */
+struct sh_sgtl5000_priv {
+        int hp_gpio;
+        int hp_active_low;
+        int mic_gpio;
+        int mic_active_low;
+        int hp_irq;
+        int mic_irq;
+};
+
+static struct sh_sgtl5000_priv card_priv;
+#endif
 
 /* regulator supplies for sgtl5000, VDDD is an optional external supply */
 enum sgtl5000_regulator_supplies {
@@ -143,6 +165,43 @@ static int mic_bias_event(struct snd_soc_dapm_widget *w,
 	}
 	return 0;
 }
+
+#ifdef CONFIG_IWG27M
+/* IWG27M: Audio: HeadPhone and Mic Detect Implementation */
+/* 
+ *Headphone Detect Handler 
+ */
+static irqreturn_t hp_handler(int irq, void *dev_id)
+{
+	struct sh_sgtl5000_priv *priv = &card_priv;
+	int hp_status;
+
+	hp_status = gpio_get_value(priv->hp_gpio) ? 1 : 0;
+	if (hp_status != priv->hp_active_low)
+		printk("Headphone is plugged\n");
+	else
+		printk("Headphone is unplugged\n");
+
+	return IRQ_RETVAL(1);
+}
+
+/*
+ *Microphone Detect handler 
+ */
+static irqreturn_t mic_handler(int irq, void *dev_id)
+{
+	struct sh_sgtl5000_priv *priv = &card_priv;
+	int mic_status;
+
+	mic_status = gpio_get_value(priv->mic_gpio) ? 1 : 0;
+	if (mic_status != priv->mic_active_low)
+		printk("Microphone is plugged\n");
+	else
+		printk("Microphone is unplugged\n");
+
+	return IRQ_RETVAL(1);
+}
+#endif
 
 /*
  * As manual described, ADC/DAC only works when VAG powerup,
@@ -408,7 +467,7 @@ static const struct snd_kcontrol_new sgtl5000_snd_controls[] = {
 
 	SOC_DOUBLE_TLV("Headphone Playback Volume",
 			SGTL5000_CHIP_ANA_HP_CTRL,
-			0, 8,
+			1, 9,
 			0x7f, 1,
 			headphone_volume),
 	SOC_SINGLE("Headphone Playback Switch", SGTL5000_CHIP_ANA_CTRL,
@@ -1091,6 +1150,14 @@ static int sgtl5000_probe(struct snd_soc_codec *codec)
 	int ret;
 	struct sgtl5000_priv *sgtl5000 = snd_soc_codec_get_drvdata(codec);
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: Audio: HeadPhone and Mic Detect Implementation */
+	struct sh_sgtl5000_priv *priv = &card_priv;
+	struct device_node *np;
+	np = of_find_compatible_node(NULL, NULL, "fsl,sgtl5000");
+	int hp_status, mic_status;
+#endif
+
 	/* power up sgtl5000 */
 	ret = sgtl5000_set_power_regs(codec);
 	if (ret)
@@ -1137,6 +1204,37 @@ static int sgtl5000_probe(struct snd_soc_codec *codec)
 	 * Enable DAP in kcontrol and dapm.
 	 */
 	snd_soc_write(codec, SGTL5000_DAP_CTRL, 0);
+
+#ifdef CONFIG_IWG27M
+	/* IWG27M: Audio: HeadPhone and Mic Detect Implementation */
+
+	priv->hp_gpio = of_get_named_gpio_flags(np, "hp-det-gpios", 0,
+			(enum of_gpio_flags *)&priv->hp_active_low);
+	priv->mic_gpio = of_get_named_gpio_flags(np, "mic-det-gpios", 0,
+			(enum of_gpio_flags *)&priv->mic_active_low);
+
+	gpio_request(priv->hp_gpio, "HeadPhone-Detect");
+	gpio_direction_input(priv->hp_gpio);
+	priv->hp_irq = gpio_to_irq(priv->hp_gpio);
+	hp_status = gpio_get_value(priv->hp_gpio) ? 1 : 0;
+
+	ret=request_irq(priv->hp_irq,hp_handler, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,"HeadPhone",0);
+	if (ret < 0) {
+		printk(KERN_ALERT "%s: request hp_irq failed with %d\n",__func__, ret);
+		free_irq(priv->hp_irq,0);
+	}
+
+	gpio_request(priv->mic_gpio, "Microphone-Detect");
+	gpio_direction_input(priv->mic_gpio);
+	priv->mic_irq = gpio_to_irq(priv->mic_gpio);
+	mic_status = gpio_get_value(priv->mic_gpio) ? 1 : 0;
+
+	ret=request_irq(priv->mic_irq,mic_handler,IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,"MicroPhone",0);
+	if (ret < 0) {
+		printk(KERN_ALERT "%s: request mic_irq failed with %d\n",__func__, ret);
+		free_irq(priv->mic_irq,0);
+	}
+#endif
 
 	return 0;
 

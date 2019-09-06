@@ -29,6 +29,8 @@
 #include <soc/imx/revision.h>
 #include <soc/imx/src.h>
 #include <soc/imx/fsl_sip.h>
+#include <linux/of_gpio.h>
+#include <linux/gpio.h>
 
 struct imx8_soc_data {
 	char *name;
@@ -38,6 +40,8 @@ struct imx8_soc_data {
 static u32 imx8_soc_id;
 static u32 imx8_soc_rev = IMX_CHIP_REVISION_UNKNOWN;
 static u64 imx8_soc_uid;
+
+static int sata_act_gpio;
 
 static const struct imx8_soc_data *soc_data;
 
@@ -284,6 +288,147 @@ static void __init imx8mq_noc_init(void)
 		pr_err("Config NOC for VPU and CPU fail!\n");
 }
 
+/* IWG27M: SOM Revision and BSP info */
+#ifdef CONFIG_IWG27M
+
+#define        BSP_VERSION             "iW-PRFHZ-SC-01-R2.0-REL1.0-Linux4.9.51-PATCH006"
+
+static int __init som_revision (void)
+{
+       struct device_node *np;
+       int i, val, err, pins_cnt;
+       unsigned *pins;
+       short revision = 0;
+
+       np = of_find_compatible_node(NULL, NULL, "iw,iwg27m-com");
+       if (!np) {
+               pr_warn("failed to find iwg27m-com node\n");
+               revision =-1;
+               goto put_node;
+       }
+
+       /* Fill GPIO pin array */
+       pins_cnt = of_gpio_named_count(np, "som-rev-gpios");
+       if (pins_cnt <= 0) {
+               pr_warn("gpios DT property empty / missing\n");
+               revision =-1;
+               goto put_node;
+       }
+
+       pins = kzalloc(pins_cnt * sizeof(unsigned), GFP_KERNEL);
+       if (!pins) {
+               pr_warn("unable to allocate the memory\n");
+               revision =-1;
+               goto put_node;
+       }
+       for (i = 0; i < pins_cnt; i++) {
+
+               val = of_get_named_gpio(np, "som-rev-gpios",i);
+               if (val < 0) {
+                       pr_warn("unable to get the gpio\n");
+                       revision =-1;
+                       goto entryfail;
+               }
+
+               pins[i] = val;
+
+       }
+       /* Request as a input GPIO and read the value */
+       for (i = 0; i < pins_cnt; i++) {
+               err = gpio_request(pins[i],"som-rev GPIO");
+               if (err){
+                       pr_warn("unable to request for gpio\n");
+                       revision =-1;
+                       goto entryfail;
+               }
+
+               err = gpio_direction_input(pins[i]);
+               if (err) {
+                       pr_warn("unable to set gpio as input\n");
+                       revision =-1;
+                       goto entryfail;
+               }
+
+               revision |= gpio_get_value(pins[i]) << i;
+               gpio_free(pins[i]);
+       }
+
+entryfail:
+       kfree(pins);
+put_node:
+       of_node_put(np);
+       return revision;
+}
+
+static void __init imx8_iwg27m_sata_act_led (void)
+{
+       struct device_node *np;
+
+               np = of_find_compatible_node(NULL, NULL, "fsl,imx8qm-ahci");
+       if (!np) {
+               pr_warn("failed to find fsl,imx8qm-ahci node\n");
+               goto put_node;
+       }
+
+       sata_act_gpio = of_get_named_gpio(np, "sata-act-gpios", 0);
+       if (gpio_is_valid(sata_act_gpio) &&
+                       !gpio_request_one(sata_act_gpio, GPIOF_DIR_OUT, "sata-act")) {
+
+               gpio_set_value(sata_act_gpio, 1);
+       }
+put_node:
+       of_node_put(np);
+}
+
+static void __init imx8_iwg27m_usb(void)
+{
+	struct device_node *np;
+	static int hub_rst_gpio;
+
+	np = of_find_node_by_path("/cdns3@5b110000");
+	if (np)
+		hub_rst_gpio = of_get_named_gpio(np, "hub-reset-gpio", 0);
+	else
+		pr_warn("\nError: Unable to get hub reset gpio input\n");
+
+	if (gpio_is_valid(hub_rst_gpio) &&
+			!gpio_request_one(hub_rst_gpio, GPIOF_DIR_OUT, "USB")) {
+
+		gpio_set_value(hub_rst_gpio, 1);
+	}
+
+put_node:
+of_node_put(np);
+}
+
+void imx8_iwg27m_sata_act_led_flip(int value)
+{
+       if (gpio_is_valid(sata_act_gpio))
+               gpio_set_value(sata_act_gpio, value);
+}
+
+static void print_board_info (void)
+{
+       int som_rev, pcb_rev, bom_rev;
+       som_rev = som_revision();
+
+       if (som_rev < 0) { 
+               pcb_rev = 0;
+               bom_rev = 0;
+       } else {
+               pcb_rev = (((som_rev) & 0x30) >> 4) + 1 ;
+               bom_rev = ((som_rev) & 0x0F) ;
+       }
+
+       printk ("\n");
+       printk ("Board Info:\n");
+       printk ("\tBSP Version     : %s\n", BSP_VERSION);
+       printk ("\tSOM Version     : iW-PRFHZ-AP-01-R%x.%x\n", pcb_rev, bom_rev);
+       printk ("\n");
+
+}
+#endif
+
 static int __init imx8_soc_init(void)
 {
 	struct soc_device_attribute *soc_dev_attr;
@@ -317,6 +462,16 @@ static int __init imx8_soc_init(void)
 	if (of_machine_is_compatible("fsl,imx8mq"))
 		imx8mq_noc_init();
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: Sata activity LED */
+	imx8_iwg27m_sata_act_led();
+ 
+   /* IWG27M: Board and BSP info Print */
+	print_board_info();
+	/* IWG27M: USB hub reset gpio support */
+	imx8_iwg27m_usb();
+
+#endif
 	return 0;
 
 free_rev:
