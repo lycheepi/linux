@@ -170,11 +170,6 @@
 		      <&usdhc1 0x12>, <&usbotg1 0x11>;
 };
 
-/* DC0 */
-&pd_dc1 {
-	xen,passthrough;
-};
-
 &lvds_region2 {
 	xen,passthrough;
 };
