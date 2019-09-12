@@ -924,7 +924,7 @@
 		#thermal-sensor-cells = <1>;
 	};
 
-	thermal-zones {
+	thermal_zones: thermal-zones {
 		/* cpu thermal */
 		cpu-thermal0 {
 			polling-delay-passive = <250>;
@@ -1915,7 +1915,7 @@
 		status = "disabled";
 	};
 
-	camera {
+	camera: camera {
 		compatible = "fsl,mxc-md", "simple-bus";
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -3325,7 +3325,7 @@
 		status = "disabled";
 	};
 
-	display-subsystem {
+	display: display-subsystem {
 		compatible = "fsl,imx-display-subsystem";
 		ports = <&dpu1_disp0>, <&dpu1_disp1>,
 			<&dpu2_disp0>, <&dpu2_disp1>;

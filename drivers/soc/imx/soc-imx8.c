@@ -110,7 +110,7 @@ static u32 imx_init_revision_from_scu(void)
 
 	sc_err = sc_ipc_getMuID(&mu_id);
 	if (sc_err != SC_ERR_NONE) {
-		WARN(1, "%s: Cannot obtain MU ID\n", __func__);
+		WARN(1, "%s: Cannot obtain MU ID mu_id = %u\n", __func__, mu_id);
 
 		return IMX_CHIP_REVISION_UNKNOWN;
 	}
