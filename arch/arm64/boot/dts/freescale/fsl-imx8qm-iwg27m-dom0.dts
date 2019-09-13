@@ -12,10 +12,14 @@
  * GNU General Public License for more details.
  */
 
+
 #include "fsl-imx8qm-iwg27m.dts"
 #include "fsl-imx8qm-xen.dtsi"
 
 / {
+        model = "iW-RainboW-G27D-i.MX8QM_SMARC DOM0";
+        compatible = "fsl,imx8qm-iwg27m", "fsl,imx8qm";
+
 	chosen {
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -146,6 +150,26 @@
 		status = "disabled";
 	};
 
+        cm41: cm41@1 {
+                fsl,sc_rsrc_id = <SC_R_M4_1_PID0>,
+                                 <SC_R_M4_1_PID1>,
+                                 <SC_R_M4_1_PID2>,
+                                 <SC_R_M4_1_PID3>,
+                                 <SC_R_M4_1_PID4>;
+                #stream-id-cells = <1>;
+                iommus = <&smmu>;
+                xen,passthrough;
+        };
+
+        irqsteer_cm41: irqsteer_cm41@0x51080000 {
+                reg = <0x0 0x51080000 0x0 0x10000>;
+                xen,passthrough;
+        };
+
+        mu_rpmsg1_b: mu_rpmsg1_b@0x5d2a0000 {
+                reg = <0x0 0x5d2a0000 0x0 0x10000>;
+                xen,passthrough;
+        };
 };
 
 &usbotg1_lpcg {

@@ -9,6 +9,7 @@ dtb-$(CONFIG_ARCH_FSL_IMX8QM) += fsl-imx8qm-lpddr4-arm2.dtb \
 				 fsl-imx8qm-ddr4-arm2.dtb \
 				 fsl-imx8qm-iwg27m.dtb \
 				 fsl-imx8qm-iwg27m-dom0.dtb \
+                                 fsl-imx8qm-iwg27m-domu.dtb \
 				 fsl-imx8qm-lpddr4-arm2_ca53.dtb \
 				 fsl-imx8qm-lpddr4-arm2_ca72.dtb \
 				 fsl-imx8qm-mek.dtb \

@@ -331,7 +331,6 @@
 /delete-node/ &dpr2_channel2;
 /delete-node/ &dpr2_channel3;
 /delete-node/ &dpu1;
-/delete-node/ &dsp;
 /delete-node/ &irqsteer_dsi1;
 /delete-node/ &i2c0_mipi_dsi1;
 /delete-node/ &mipi_dsi_csr2;
@@ -343,8 +342,6 @@
 /delete-node/ &ldb1;
 /delete-node/ &lvds1_pwm;
 /delete-node/ &camera;
-/delete-node/ &adc0;
-/delete-node/ &adc1;
 /delete-node/ &i2c0;
 /delete-node/ &i2c1;
 /delete-node/ &i2c2;
@@ -391,7 +388,6 @@
 /delete-node/ &lpuart2;
 /delete-node/ &lpuart3;
 /delete-node/ &lpuart4;
-/delete-node/ &emvsim0;
 /delete-node/ &edma0;
 /delete-node/ &edma2;
 /delete-node/ &edma3;
@@ -469,13 +465,9 @@
 /delete-node/ &vpu;
 /delete-node/ &acm;
 /delete-node/ &esai0;
-/delete-node/ &esai1;
 /delete-node/ &spdif0;
-/delete-node/ &spdif1;
 /delete-node/ &sai1;
 /delete-node/ &sai0;
-/delete-node/ &sai2;
-/delete-node/ &sai3;
 /delete-node/ &sai_hdmi_rx;
 /delete-node/ &sai_hdmi_tx;
 /delete-node/ &sai6;
