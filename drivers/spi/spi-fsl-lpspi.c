@@ -76,6 +76,9 @@
 #define CFGR1_NOSTALL   (1 << 3)	/* NO STALL */
 #define CFGR1_SAMPLE	(1 << 1)	/* SAMPLE POINT*/
 #define CFGR1_MASTER	(1 << 0)	/* MASTER MODE */
+#ifdef CONFIG_IWG27M
+#define CFGR1_PINSWAP   (3 << 24)       /* SWAPING SIN and SOUT */
+#endif
 #define RSR_RXEMPTY	(1 << 1)
 #define TCR_CPOL	(1 << 31)
 #define TCR_CPHA	(1 << 30)
@@ -112,6 +115,10 @@ struct fsl_lpspi_data {
 	u8 txfifosize;
 	u8 rxfifosize;
 	unsigned remain;
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	u32 transferoncelen;
+#endif
 
 	int chipselect[0];
 };
@@ -163,7 +170,10 @@ static void fsl_lpspi_intctrl(
 static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 {
 	u8 txfifo_cnt;
+#ifndef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
 	u32 temp;
+#endif
 
 	txfifo_cnt = readl(fsl_lpspi->base + IMX7ULP_FSR) & 0xff;
 
@@ -174,6 +184,8 @@ static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 		txfifo_cnt++;
 	}
 
+#ifndef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
 	if (txfifo_cnt < fsl_lpspi->txfifosize) {
 		temp = readl(fsl_lpspi->base + IMX7ULP_TCR);
 		temp &= ~TCR_CONTC;
@@ -182,6 +194,13 @@ static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 		fsl_lpspi_intctrl(fsl_lpspi, IER_TCIE);
 	} else
 		fsl_lpspi_intctrl(fsl_lpspi, IER_TDIE);
+#else
+	fsl_lpspi->transferoncelen = txfifo_cnt;
+	if (txfifo_cnt < fsl_lpspi->txfifosize)
+		fsl_lpspi_intctrl(fsl_lpspi, IER_TCIE);
+	else
+		fsl_lpspi_intctrl(fsl_lpspi, IER_TDIE);
+#endif
 }
 
 static void fsl_lpspi_read_rx_fifo(struct fsl_lpspi_data *fsl_lpspi)
@@ -194,7 +213,10 @@ static void fsl_lpspi_set_cmd(struct fsl_lpspi_data *fsl_lpspi)
 {
 	u32 temp = 0;
 
+#ifndef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
 	temp |= TCR_CONT;
+#endif
 	temp |= fsl_lpspi->config.bpw - 1;
 	temp |= fsl_lpspi->config.prescale << 27;
 	temp |= (fsl_lpspi->config.mode & 0x11) << 30;
@@ -266,9 +288,18 @@ static int fsl_lpspi_config(struct fsl_lpspi_data *fsl_lpspi)
 
 	fsl_lpspi_set_watermark(fsl_lpspi);
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	temp = CFGR1_PCSCFG | CFGR1_MASTER;
+#else
 	temp = CFGR1_PCSCFG | CFGR1_MASTER
 		| CFGR1_SAMPLE | CFGR1_NOSTALL;
+#endif
 
+#ifdef CONFIG_IWG27M	
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	temp |= CFGR1_PINSWAP; 
+#endif
 	/* chip select polarity */
 	if (fsl_lpspi->config.mode & SPI_CS_HIGH)
 		temp |= CFGR1_PCSPOL;
@@ -284,20 +315,47 @@ static int fsl_lpspi_config(struct fsl_lpspi_data *fsl_lpspi)
 
 static irqreturn_t fsl_lpspi_isr(int irq, void *dev_id)
 {
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	u32 temp_SR, temp_IER;
+#else
 	u32 temp;
+#endif
 	struct fsl_lpspi_data *fsl_lpspi = dev_id;
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	temp_IER = readl(fsl_lpspi->base + IMX7ULP_IER);
+#endif
 	fsl_lpspi_intctrl(fsl_lpspi, 0);
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	temp_SR = readl(fsl_lpspi->base + IMX7ULP_SR);
+
+       while (fsl_lpspi->transferoncelen !=
+                       ((readl(fsl_lpspi->base + IMX7ULP_FSR) >> 16) & 0xFF));
+#else
 	temp = readl(fsl_lpspi->base + IMX7ULP_SR);
+#endif
 
 	fsl_lpspi_read_rx_fifo(fsl_lpspi);
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	if ((temp_SR & SR_TDF) && (temp_IER & IER_TDIE)) {
+#else
 	if ((temp & SR_TDF) && !(temp & SR_TCF)) {
+#endif
 		fsl_lpspi_write_tx_fifo(fsl_lpspi);
 		return IRQ_HANDLED;
 	}
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	if (temp_SR & SR_TCF && (temp_IER & IER_TCIE)) {
+#else
 	if (temp & SR_TCF) {
+#endif
 		complete(&fsl_lpspi->xfer_done);
 		return IRQ_HANDLED;
 	}

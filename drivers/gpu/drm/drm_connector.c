@@ -64,6 +64,10 @@ struct drm_conn_prop_enum_list {
 	struct ida ida;
 };
 
+#ifdef CONFIG_IWG27M
+int connect_type;
+#endif
+
 /*
  * Connector and encoder types.
  */
@@ -186,6 +190,9 @@ int drm_connector_init(struct drm_device *dev,
 {
 	struct drm_mode_config *config = &dev->mode_config;
 	int ret;
+#ifdef CONFIG_IWG27M
+	connect_type = connector_type;
+#endif
 	struct ida *connector_ida =
 		&drm_connector_enum_list[connector_type].ida;
 

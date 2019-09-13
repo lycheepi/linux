@@ -12,6 +12,9 @@
  * for more details.
  */
 #include <drm/drm_fourcc.h>
+#ifdef CONFIG_IWG27M
+#include <drm/drm_mode.h>
+#endif
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/io.h>
@@ -140,6 +143,10 @@ enum {
 #define NUM_ROWS_ACTIVE				BIT(0)
 #define ROWS_0_6				BIT(0)
 #define ROWS_0_4				0
+
+#ifdef CONFIG_IWG27M
+extern int connect_type;
+#endif
 
 struct dprc {
 	struct device *dev;
@@ -355,7 +362,12 @@ void dprc_configure(struct dprc *dprc, unsigned int stream_id,
 		}
 		p1_h = round_up(height, 4);
 	}
-
+#ifdef CONFIG_IWG27M
+	/* IWG27M:MIPI-DSI:Adding rotation from controller side for MIPI-DSI */
+	if(connect_type == DRM_MODE_CONNECTOR_DSI)
+		dprc_write(dprc, PITCH(stride) | 0x08, FRAME_CTRL0);
+	else
+#endif
 	dprc_write(dprc, PITCH(stride), FRAME_CTRL0);
 	switch (modifier) {
 	case DRM_FORMAT_MOD_AMPHION_TILED:

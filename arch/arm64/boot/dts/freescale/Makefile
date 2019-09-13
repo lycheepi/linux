@@ -5,6 +5,7 @@ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls2080a-rdb.dtb
 dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls2080a-simu.dtb
 dtb-$(CONFIG_ARCH_FSL_IMX8QM) += fsl-imx8qm-lpddr4-arm2.dtb \
 				 fsl-imx8qm-ddr4-arm2.dtb \
+				 fsl-imx8qm-iwg27m.dtb \
 				 fsl-imx8qm-lpddr4-arm2_ca53.dtb \
 				 fsl-imx8qm-lpddr4-arm2_ca72.dtb \
 				 fsl-imx8qm-mek.dtb \

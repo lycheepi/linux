@@ -427,6 +427,14 @@ config ARM64_ERRATUM_843419
 
 	  If unsure, say Y.
 
+config IWG27M
+        bool "Enable Support for iWave IWG27M"
+        depends on ARCH_FSL_IMX8QM
+        default y
+        help
+          This enables support for the iWave's IWG27M Platform. If you don't
+          know what to do here, say N
+
 config CAVIUM_ERRATUM_22375
 	bool "Cavium erratum 22375, 24313"
 	default y

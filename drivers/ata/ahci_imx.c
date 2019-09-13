@@ -593,7 +593,11 @@ static struct ata_port_operations ahci_imx_ops = {
 };
 
 static const struct ata_port_info ahci_imx_port_info = {
+#ifdef CONFIG_IWG27M
+        .flags          = AHCI_FLAG_COMMON | ATA_FLAG_SW_ACTIVITY,
+#else
 	.flags		= AHCI_FLAG_COMMON,
+#endif
 	.pio_mask	= ATA_PIO4,
 	.udma_mask	= ATA_UDMA6,
 	.port_ops	= &ahci_imx_ops,

@@ -984,11 +984,22 @@ static void ahci_sw_activity_blink(unsigned long arg)
 		/* get the current LED state */
 		activity_led_state = led_message & EM_MSG_LED_VALUE_ON;
 
+#ifdef CONFIG_IWG27M
+               /* Added for SATA activity LED support */
+               if (activity_led_state){
+                       imx8_iwg27m_sata_act_led_flip(activity_led_state);
+                       activity_led_state = 0;
+               }
+               else {
+                       imx8_iwg27m_sata_act_led_flip(activity_led_state);
+                       activity_led_state = 1;
+               }
+#else
 		if (activity_led_state)
 			activity_led_state = 0;
 		else
 			activity_led_state = 1;
-
+#endif
 		/* clear old state */
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
