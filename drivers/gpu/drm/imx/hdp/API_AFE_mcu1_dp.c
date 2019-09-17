@@ -256,6 +256,10 @@ u16 aux_cal_cfg(state_struct *state, u16 prev_calib_code)
 	if (new_calib_code != prev_calib_code) {
 		rdata = Afe_read(state, TX_ANA_CTRL_REG_1);
 		rdata &= 0xDFFF;
+#ifdef CONFIG_IWG27M
+		/* IWG27M: DP-AUX: Fix for DP-AUX swap */
+		rdata |= 0x1000;
+#endif
 		Afe_write(state, TX_ANA_CTRL_REG_1, rdata);
 		Afe_write(state, TX_DIG_CTRL_REG_2, new_calib_code);
 		udelay(10000);
@@ -279,11 +283,20 @@ void aux_cfg(state_struct *state)
 	udelay(150);
 	Afe_write(state, TX_ANA_CTRL_REG_3, 0x0000);
 	udelay(150);
+#ifdef CONFIG_IWG27M
+	/* IWG27M: DP-AUX: Fix for DP-AUX swap */
+	Afe_write(state, TX_ANA_CTRL_REG_1, 0x3008);
+	udelay(150);
+	Afe_write(state, TX_ANA_CTRL_REG_1, 0x3018);
+	udelay(150);
+	Afe_write(state, TX_ANA_CTRL_REG_1, 0xB018);
+#else
 	Afe_write(state, TX_ANA_CTRL_REG_1, 0x2008);
 	udelay(150);
 	Afe_write(state, TX_ANA_CTRL_REG_1, 0x2018);
 	udelay(150);
 	Afe_write(state, TX_ANA_CTRL_REG_1, 0xA018);
+#endif
 	udelay(150);
 	Afe_write(state, TX_ANA_CTRL_REG_2, 0x030C);
 	udelay(150);
@@ -291,9 +304,16 @@ void aux_cfg(state_struct *state)
 	udelay(150);
 	Afe_write(state, TX_ANA_CTRL_REG_4, 0x1001);
 	udelay(150);
+#ifdef CONFIG_IWG27M
+	/* IWG27M: DP-AUX: Fix for DP-AUX swap */
+	Afe_write(state, TX_ANA_CTRL_REG_1, 0xB098);
+	udelay(5000);
+	Afe_write(state, TX_ANA_CTRL_REG_1, 0xB198);
+#else
 	Afe_write(state, TX_ANA_CTRL_REG_1, 0xA098);
 	udelay(5000);
 	Afe_write(state, TX_ANA_CTRL_REG_1, 0xA198);
+#endif
 	udelay(5000);
 	Afe_write(state, TX_ANA_CTRL_REG_2, 0x030D);
 	udelay(5000);

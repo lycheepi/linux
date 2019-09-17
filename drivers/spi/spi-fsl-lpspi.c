@@ -68,6 +68,9 @@
 #define CFGR1_PCSPOL	BIT(8)
 #define CFGR1_NOSTALL	BIT(3)
 #define CFGR1_MASTER	BIT(0)
+#ifdef CONFIG_IWG27M
+#define CFGR1_PINSWAP   (3 << 24)       /* SWAPING SIN and SOUT */
+#endif
 #define RSR_RXEMPTY	BIT(1)
 #define TCR_CPOL	BIT(31)
 #define TCR_CPHA	BIT(30)
@@ -99,6 +102,10 @@ struct fsl_lpspi_data {
 	u32 remain;
 	u8 txfifosize;
 	u8 rxfifosize;
+#ifdef CONFIG_IWG27M
+       /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+       u32 transferoncelen;
+#endif
 
 	struct lpspi_config config;
 	struct completion xfer_done;
@@ -186,6 +193,10 @@ static int fsl_lpspi_txfifo_empty(struct fsl_lpspi_data *fsl_lpspi)
 static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 {
 	u8 txfifo_cnt;
+#ifndef CONFIG_IWG27M
+       /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+        u32 temp;
+#endif
 
 	txfifo_cnt = readl(fsl_lpspi->base + IMX7ULP_FSR) & 0xff;
 
@@ -196,10 +207,19 @@ static void fsl_lpspi_write_tx_fifo(struct fsl_lpspi_data *fsl_lpspi)
 		txfifo_cnt++;
 	}
 
+#ifndef CONFIG_IWG27M
+       /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
 	if (!fsl_lpspi->remain && (txfifo_cnt < fsl_lpspi->txfifosize))
 		writel(0, fsl_lpspi->base + IMX7ULP_TDR);
 	else
 		fsl_lpspi_intctrl(fsl_lpspi, IER_TDIE);
+#else
+       fsl_lpspi->transferoncelen = txfifo_cnt;
+       if (txfifo_cnt < fsl_lpspi->txfifosize)
+               fsl_lpspi_intctrl(fsl_lpspi, IER_TCIE);
+       else
+               fsl_lpspi_intctrl(fsl_lpspi, IER_TDIE);
+#endif
 }
 
 static void fsl_lpspi_read_rx_fifo(struct fsl_lpspi_data *fsl_lpspi)
@@ -223,7 +243,10 @@ static void fsl_lpspi_set_cmd(struct fsl_lpspi_data *fsl_lpspi,
 	 * For the first transfer, clear TCR_CONTC to assert SS.
 	 * For subsequent transfer, set TCR_CONTC to keep SS asserted.
 	 */
+#ifndef CONFIG_IWG27M
+        /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
 	temp |= TCR_CONT;
+#endif
 	if (is_first_xfer)
 		temp &= ~TCR_CONTC;
 	else
@@ -287,7 +310,17 @@ static int fsl_lpspi_config(struct fsl_lpspi_data *fsl_lpspi)
 
 	fsl_lpspi_set_watermark(fsl_lpspi);
 
+#ifdef CONFIG_IWG27M
+       /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+       temp = CFGR1_PCSCFG | CFGR1_MASTER;
+#else
 	temp = CFGR1_PCSCFG | CFGR1_MASTER | CFGR1_NOSTALL;
+#endif
+
+#ifdef CONFIG_IWG27M
+        /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+        temp |= CFGR1_PINSWAP;
+#endif
 	if (fsl_lpspi->config.mode & SPI_CS_HIGH)
 		temp |= CFGR1_PCSPOL;
 	writel(temp, fsl_lpspi->base + IMX7ULP_CFGR1);
@@ -398,18 +431,44 @@ complete:
 
 static irqreturn_t fsl_lpspi_isr(int irq, void *dev_id)
 {
+#ifdef CONFIG_IWG27M
+        /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+        u32 temp_SR, temp_IER;
+#else
+        u32 temp;
+#endif
 	struct fsl_lpspi_data *fsl_lpspi = dev_id;
-	u32 temp;
 
+#ifdef CONFIG_IWG27M
+        /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+        temp_IER = readl(fsl_lpspi->base + IMX7ULP_IER);
+#endif
 	fsl_lpspi_intctrl(fsl_lpspi, 0);
+#ifdef CONFIG_IWG27M
+        /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+        temp_SR = readl(fsl_lpspi->base + IMX7ULP_SR);
+
+       while (fsl_lpspi->transferoncelen !=
+                       ((readl(fsl_lpspi->base + IMX7ULP_FSR) >> 16) & 0xFF));
+#else
 	temp = readl(fsl_lpspi->base + IMX7ULP_SR);
+#endif
 
 	fsl_lpspi_read_rx_fifo(fsl_lpspi);
-
+#ifdef CONFIG_IWG27M
+        /* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+        if ((temp_SR & SR_TDF) && (temp_IER & IER_TDIE)) {
+#else
 	if (temp & SR_TDF) {
+#endif
 		fsl_lpspi_write_tx_fifo(fsl_lpspi);
 
+#ifdef CONFIG_IWG27M
+        	/* IWG27M: LPSPI: NXP Patch_20180919 fix for data loss for high frequency */
+	        if (temp_SR & SR_TCF && (temp_IER & IER_TCIE))
+#else
 		if (!fsl_lpspi->remain)
+#endif
 			complete(&fsl_lpspi->xfer_done);
 
 		return IRQ_HANDLED;

@@ -31,7 +31,13 @@
 #include "mxc-isi-core.h"
 #include "mxc-isi-hw.h"
 #include "mxc-media-dev.h"
+
+#ifdef CONFIG_IWG27M
+/* IWG27M: IMX230 Camera support customization */
+#include "imx230.h"
+#else
 #include "max9286.h"
+#endif
 
 struct mxc_isi_fmt mxc_isi_out_formats[] = {
 	{
@@ -75,6 +81,33 @@ struct mxc_isi_fmt mxc_isi_out_formats[] = {
 		.colplanes	= 1,
 		.mbus_code  = MEDIA_BUS_FMT_ARGB8888_1X32,
 	}, {
+#ifdef CONFIG_IWG27M
+               /* IWG27M: IMX230 Camera support customization */
+                .name           = "SRGB32",
+                .fourcc         = V4L2_PIX_FMT_SRGGB10,
+                .depth          = { 8 },
+                .color          = MXC_ISI_OUT_FMT_RAW10,
+                .memplanes      = 1,
+                .colplanes      = 1,
+                .mbus_code      = MEDIA_BUS_FMT_SRGGB10_1X10,
+       }, {
+                .name           = "SRGB8",
+                .fourcc         = V4L2_PIX_FMT_SRGGB8,
+                .depth          = { 8 },
+                .color          = MXC_ISI_OUT_FMT_RAW8,
+                .memplanes      = 1,
+                .colplanes      = 0,
+                .mbus_code      = MEDIA_BUS_FMT_SRGGB8_1X8,
+       }, {
+                .name           = "SBGGR8",
+                .fourcc         = V4L2_PIX_FMT_SBGGR8,
+                .depth          = { 8 },
+                .color          = MXC_ISI_OUT_FMT_RAW8,
+                .memplanes      = 1,
+                .colplanes      = 1,
+                .mbus_code      = MEDIA_BUS_FMT_SBGGR8_1X8,
+        }, {
+#endif
 		.name		= "YUYV-16",
 		.fourcc		= V4L2_PIX_FMT_YUYV,
 		.depth		= { 16 },
@@ -107,6 +140,27 @@ struct mxc_isi_fmt mxc_isi_src_formats[] = {
 		.depth		= { 32 },
 		.memplanes	= 1,
 		.colplanes	= 1,
+#ifdef CONFIG_IWG27M
+               /* IWG27M: IMX230 Camera support customization */
+       }, {
+               .name           = "Bayer 8-bit BGGR8",
+               .fourcc         = V4L2_PIX_FMT_SBGGR8,
+               .depth          = { 8 },
+               .memplanes      = 1,
+               .colplanes      = 1,
+       }, {
+               .name           = "Bayer 8-bit RGGB8",
+               .fourcc         = V4L2_PIX_FMT_SRGGB8,
+               .depth          = { 8 },
+               .memplanes      = 1,
+               .colplanes      = 1,
+       }, {
+               .name           = "Bayer 10-bit RGGB10",
+               .fourcc         = V4L2_PIX_FMT_SRGGB10,
+               .depth          = { 8 },
+               .memplanes      = 1,
+               .colplanes      = 1,
+#endif
 	}
 };
 
@@ -167,6 +221,18 @@ struct mxc_isi_fmt *mxc_isi_get_src_fmt(struct v4l2_subdev_format *sd_fmt)
 	/* two fmt RGB32 and YUV444 from pixellink */
 	if (sd_fmt->format.code == MEDIA_BUS_FMT_YUYV8_1X16)
 		index = 1;
+#ifdef CONFIG_IWG27M
+        /* IWG27M: IMX230 Camera support customization */
+        else
+        if (sd_fmt->format.code == MEDIA_BUS_FMT_SBGGR8_1X8)
+                index = 2;
+        else
+        if (sd_fmt->format.code == MEDIA_BUS_FMT_SRGGB8_1X8)
+                index = 3;
+        else
+        if (sd_fmt->format.code == MEDIA_BUS_FMT_SRGGB10_1X10)
+                index = 4;
+#endif
 	else
 		index = 0;
 	return &mxc_isi_src_formats[index];
@@ -629,7 +695,12 @@ static int mxc_isi_cap_g_fmt_mplane(struct file *file, void *fh,
 	pix->height = dst_f->o_height;
 	pix->field = V4L2_FIELD_NONE;
 	pix->pixelformat = dst_f->fmt->fourcc;
+#ifdef CONFIG_IWG27M
+        /* IWG27M: IMX230 Camera support customization */
+        pix->colorspace = V4L2_COLORSPACE_RAW;
+#else
 	pix->colorspace = V4L2_COLORSPACE_JPEG;
+#endif
 	pix->num_planes = dst_f->fmt->memplanes;
 
 	for (i = 0; i < pix->num_planes; ++i) {
@@ -951,20 +1022,36 @@ static int mxc_isi_cap_g_chip_ident(struct file *file, void *fb,
 	struct mxc_isi_dev *mxc_isi = video_drvdata(file);
 	struct v4l2_device *v4l2_dev = mxc_isi->isi_cap.sd.v4l2_dev;
 	struct video_device *vdev = video_devdata(file);
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        struct sensor_data *imx230;
+#else
 	struct sensor_data *max9286;
+#endif
 	struct v4l2_subdev *sd;
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        sd = mxc_isi_get_subdev_by_name(v4l2_dev, "imx230");
+#else
 	sd = mxc_isi_get_subdev_by_name(v4l2_dev, "max9286_mipi");
+#endif
 	if (sd == NULL) {
 		v4l2_err(&mxc_isi->isi_cap.sd, "Can't find sub device\n");
 		return -ENODEV;
 	}
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        imx230 = container_of(sd, struct sensor_data, subdev);
+        sprintf(chip->match.name, "imx230%d\n", vdev->num);
+#else
 	max9286 = container_of(sd, struct sensor_data, subdev);
 	if (max9286->sensor_is_there & (0x1 << vdev->num))
 		sprintf(chip->match.name, "max9286_mipi%d\n", vdev->num);
 	else
 		return -ENODEV;
+#endif
 
 	return 0;
 }
@@ -976,7 +1063,12 @@ static int mxc_isi_cap_g_parm(struct file *file, void *fh,
 	struct v4l2_device *v4l2_dev = mxc_isi->isi_cap.sd.v4l2_dev;
 	struct v4l2_subdev *sd;
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        sd = mxc_isi_get_subdev_by_name(v4l2_dev, "imx230");
+#else
 	sd = mxc_isi_get_subdev_by_name(v4l2_dev, "max9286_mipi");
+#endif
 	if (sd == NULL) {
 		v4l2_err(&mxc_isi->isi_cap.sd, "Can't find subdev\n");
 		return -ENODEV;
@@ -991,7 +1083,12 @@ static int mxc_isi_cap_s_parm(struct file *file, void *fh,
 	struct v4l2_device *v4l2_dev = mxc_isi->isi_cap.sd.v4l2_dev;
 	struct v4l2_subdev *sd;
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        sd = mxc_isi_get_subdev_by_name(v4l2_dev, "imx230");
+#else
 	sd = mxc_isi_get_subdev_by_name(v4l2_dev, "max9286_mipi");
+#endif
 	if (sd == NULL) {
 		v4l2_err(&mxc_isi->isi_cap.sd, "Can't find subdev\n");
 		return -ENODEV;
@@ -1017,7 +1114,12 @@ static int mxc_isi_cap_enum_framesizes(struct file *file, void *priv,
 		return -EINVAL;
 	fse.code = fmt->mbus_code;
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        sd = mxc_isi_get_subdev_by_name(v4l2_dev, "imx230");
+#else
 	sd = mxc_isi_get_subdev_by_name(v4l2_dev, "max9286_mipi");
+#endif
 	if (sd == NULL) {
 		v4l2_err(&mxc_isi->isi_cap.sd, "Can't find subdev\n");
 		return -ENODEV;
@@ -1066,7 +1168,12 @@ static int mxc_isi_cap_enum_frameintervals(struct file *file, void *fh,
 		return -EINVAL;
 	fie.code = fmt->mbus_code;
 
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        sd = mxc_isi_get_subdev_by_name(v4l2_dev, "imx230");
+#else
 	sd = mxc_isi_get_subdev_by_name(v4l2_dev, "max9286_mipi");
+#endif
 	if (sd == NULL) {
 		v4l2_err(&mxc_isi->isi_cap.sd, "Can't find subdev\n");
 		return -ENODEV;
@@ -1398,9 +1505,16 @@ static int mxc_isi_register_cap_device(struct mxc_isi_dev *mxc_isi,
 		goto err_free_ctx;
 
 	/* Default configuration  */
+#ifdef CONFIG_IWG27M
+	/* IWG27M: IMX230 Camera support customization */
+        isi_cap->dst_f.width = 1920;
+        isi_cap->dst_f.height = 1080;
+        isi_cap->dst_f.fmt = &mxc_isi_out_formats[5];;
+#else
 	isi_cap->dst_f.width = 1280;
 	isi_cap->dst_f.height = 800;
 	isi_cap->dst_f.fmt = &mxc_isi_out_formats[0];;
+#endif
 	isi_cap->src_f.fmt = isi_cap->dst_f.fmt;
 
 	isi_cap->cap_pad.flags = MEDIA_PAD_FL_SINK;

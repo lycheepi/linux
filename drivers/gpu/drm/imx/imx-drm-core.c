@@ -34,7 +34,11 @@
 #include "ipuv3/ipuv3-plane.h"
 
 #if IS_ENABLED(CONFIG_DRM_FBDEV_EMULATION)
+#ifdef CONFIG_IWG27M
+static int legacyfb_depth = 32;
+#else
 static int legacyfb_depth = 16;
+#endif
 module_param(legacyfb_depth, int, 0444);
 #endif
 
@@ -320,8 +324,13 @@ static int imx_drm_bind(struct device *dev)
 	 */
 #if IS_ENABLED(CONFIG_DRM_FBDEV_EMULATION)
 	if (legacyfb_depth != 16 && legacyfb_depth != 32) {
+#ifdef CONFIG_IWG27M
+		dev_warn(dev, "Invalid legacyfb_depth.  Defaulting to 32bpp\n");
+		legacyfb_depth = 32;
+#else
 		dev_warn(dev, "Invalid legacyfb_depth.  Defaulting to 16bpp\n");
 		legacyfb_depth = 16;
+#endif
 	}
 
 	if (legacyfb_depth == 16 && has_dcss(dev))

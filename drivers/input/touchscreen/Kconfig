@@ -190,6 +190,26 @@ config TOUCHSCREEN_CY8CTMG110
 	  To compile this driver as a module, choose M here: the
 	  module will be called cy8ctmg110_ts.
 
+config TOUCHSCREEN_GT1151
+        bool "Goodix touchpanel GT1151 series"
+        depends on I2C
+        help
+          Say Y here if you have a Goodix GT1151 touchscreen.
+          Gt1151 controllers are multi touch controllers which can
+          report 5 touches at a time.
+
+          If unsure, say N.
+
+config TOUCHSCREEN_CST148
+        bool "Hynitron touchpanel CST148 series"
+        depends on I2C
+        help
+          Say Y here if you have a Hynitron CST148 touchscreen.
+          CST148 controllers are multi touch controllers which can
+          report 5 touches at a time.
+
+          If unsure, say N.
+
 config TOUCHSCREEN_CYTTSP_CORE
 	tristate "Cypress TTSP touchscreen"
 	help
@@ -1274,3 +1294,5 @@ config TOUCHSCREEN_ROHM_BU21023
 endif
 
 source "drivers/input/touchscreen/focaltech_touch/Kconfig"
+source "drivers/input/touchscreen/gt1151/Kconfig"
+source "drivers/input/touchscreen/cst148/Kconfig"
