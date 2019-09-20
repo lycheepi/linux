@@ -36,7 +36,7 @@
 		mmc0 = &usdhc1;
 		dpu1 = &dpu2;
 		ldb1 = &ldb2;
-		serial1 = &lpuart1;
+                serial1 = &lpuart1;
 	};
 
 	cpus {
@@ -141,7 +141,7 @@
 	};
 
 	hypervisor {
-		compatible = "xen,xen-4.10", "xen,xen";
+		compatible = "xen,xen-4.11", "xen,xen";
 		reg = <0x0 0x38000000 0x0 0x1000000>;
 		interrupts = <GIC_PPI 15 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)>;
 		interrupt-parent = <&gic>;
@@ -225,7 +225,7 @@
 
 &dpu2_intsteer {
 	reg = <0x0 0x57000000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &prg10 {
@@ -275,37 +275,37 @@
 
 &dpr3_channel1 {
 	reg = <0x0 0x570d0000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &dpr3_channel2 {
 	reg = <0x0 0x570e0000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &dpr3_channel3 {
 	reg = <0x0 0x570f0000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &dpr4_channel1 {
 	reg = <0x0 0x57100000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &dpr4_channel2 {
 	reg = <0x0 0x57110000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &dpr4_channel3 {
 	reg = <0x0 0x57120000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &dpu2 {
 	reg = <0x0 0x57180000 0x0 0x40000>;
-	status = "okay";
+	status = "disabled";
 
 	dpu2_disp0: port@0 {
 		dpu2_disp0_mipi_dsi: mipi-dsi-endpoint {
@@ -335,16 +335,16 @@
 
 &lvds_region2 {
 	reg = <0x0 0x57240000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &ldb2_phy {
 	reg = <0x0 0x57241000 0x0 0x100>;
-	status = "okay";
+	status = "disabled";
 };
 
 &ldb2 {
-	status = "okay";
+	status = "disabled";
 
 	lvds-channel@0 {
 		fsl,data-mapping = "jeida";
@@ -412,7 +412,7 @@
 
 &i2c1_lvds1 {
 	reg = <0x0 0x57247000 0x0 0x1000>;
-	status = "okay";
+	status = "disabled";
 };
 
 /delete-node/ &irqsteer_lvds0;
@@ -446,7 +446,7 @@
 };
 &gpio1 {
 	/delete-property/ power-domains;
-	status = "okay";
+	status = "disabled";
 };
 &gpio2 {
 	/delete-property/ power-domains;
@@ -458,7 +458,7 @@
 };
 &gpio4 {
 	/delete-property/ power-domains;
-	status = "okay";
+	status = "disabled";
 };
 &gpio5 {
 	/delete-property/ power-domains;
@@ -569,7 +569,7 @@
 	 */
 	vdev-nums = <1>;
 	reg = <0x0 0x90100000 0x0 0x10000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &mu_rpmsg1 {

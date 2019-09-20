@@ -312,7 +312,7 @@ struct syscore_ops imx8_mu_syscore_ops = {
 int __init imx8_mu_init(void)
 {
 	struct device_node *np;
-	u32 irq;
+	int irq;
 	int err;
 	sc_err_t sciErr;
 

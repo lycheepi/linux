@@ -18,7 +18,7 @@
 / {
 	/delete-node/ thermal-zones;
 
-/*	/delete-node/ wu; */
+	/delete-node/ wu;
 
 	edma00: dma-controller0@5a1f0000 {
 		compatible = "fsl,imx8qm-edma";

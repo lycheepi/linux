@@ -172,12 +172,24 @@
         };
 };
 
+&mu_6_lpcg {
+        xen,passthrough;
+};
+
+&mu_6_lpcg_b {
+        xen,passthrough;
+};
+
+&mu_7_lpcg_b {
+        xen,passthrough;
+};
+
 &usbotg1_lpcg {
-	xen,passthrough;
+        xen,passthrough;
 };
 
 &sdhc1_lpcg {
-	xen,passthrough;
+        xen,passthrough;
 };
 
 &lpuart1 {
@@ -188,12 +200,26 @@
 	xen,passthrough;
 };
 
+
+/*
+ * DomU CM41 use this, but DomU OS not need this,
+ * because smmu is enabled for CM41, so need to
+ *create the lpuart2 mapping in SMMU
+ */
+&lpuart2 {
+        xen,passthrough;
+};
+
+&lpuart2_lpcg {
+        xen,passthrough;
+};
+
 &di_lvds1_lpcg {
-	xen,passthrough;
+        xen,passthrough;
 };
 
 &dc_1_lpcg {
-	xen,passthrough;
+        xen,passthrough;
 };
 
 &edma01 {
@@ -206,7 +232,8 @@
 /* SMMU */
 &smmu {
 	mmu-masters = <&dpu2 0x13>, <&gpu_3d1 0x15>,
-		      <&usdhc1 0x12>, <&usbotg1 0x11>;
+		      <&usdhc1 0x12>, <&usbotg1 0x11>,
+		      <&edma01 0x10>;
 };
 
 &lvds_region2 {
@@ -344,3 +371,8 @@
 	reg = <0x0 0x5b100000 0x0 0x1000>;
 	xen,passthrough;
 };
+
+&gpio4 {
+        xen,shared;
+};
+
