@@ -68,6 +68,22 @@
 				SC_R_LVDS_1
 				SC_R_LVDS_1_I2C_0
 				SC_R_LVDS_1_PWM_0
+                                SC_R_DC_0
+                                SC_R_DC_0_BLIT0
+                                SC_R_DC_0_BLIT1
+                                SC_R_DC_0_BLIT2
+                                SC_R_DC_0_BLIT_OUT
+                                SC_R_DC_0_CAPTURE0
+                                SC_R_DC_0_CAPTURE1
+                                SC_R_DC_0_WARP
+                                SC_R_DC_0_INTEGRAL0
+                                SC_R_DC_0_INTEGRAL1
+                                SC_R_DC_0_VIDEO0
+                                SC_R_DC_0_VIDEO1
+                                SC_R_DC_0_FRAC0
+                                SC_R_DC_0_FRAC1
+                                SC_R_DC_0_PLL_0
+                                SC_R_DC_0_PLL_1
 				SC_R_DC_1
 				SC_R_DC_1_BLIT0
 				SC_R_DC_1_BLIT1
@@ -148,11 +164,12 @@
 		};
 	};
 
+	/*
 	display-subsystem {
 		compatible = "fsl,imx-display-subsystem";
 		ports = <&dpu1_disp0>, <&dpu1_disp1>;
 	};
-
+	*/
 	/* Passthrough to domu */
 	mu2: mu@5d1d0000 {
 		compatible = "fsl,imx8-mu";
@@ -244,9 +261,37 @@
 
 /* SMMU */
 &smmu {
-	mmu-masters = <&dpu2 0x13>, <&gpu_3d1 0x15>,
+	mmu-masters = <&dpu2 0x13>, <&dpu1 0x14>, <&gpu_3d1 0x15>,
 		      <&usdhc1 0x12>, <&usbotg1 0x11>,
 		      <&edma01 0x10>;
+};
+
+&lvds_region1 {
+        xen,passthrough;
+};
+
+&irqsteer_lvds1 {
+        xen,passthrough;
+};
+
+&i2c1_lvds1 {
+        xen,passthrough;
+};
+
+&ldb1_phy {
+        xen,passthrough;
+};
+
+&ldb1 {
+        xen,passthrough;
+};
+
+&ldb1_phy {
+        xen,passthrough;
+};
+
+&ldb1 {
+        xen,passthrough;
 };
 
 &lvds_region2 {
@@ -261,12 +306,90 @@
 	xen,passthrough;
 };
 
-&ldb2_phy {
+&ldb1_phy {
 	xen,passthrough;
 };
 
-&ldb2 {
+&ldb1 {
 	xen,passthrough;
+};
+
+&ldb2_phy {
+        xen,passthrough;
+};
+
+&ldb2 {
+        xen,passthrough;
+};
+
+&dpu1_intsteer {
+        xen,passthrough;
+};
+
+&dpu1 {
+        xen,passthrough;
+        #stream-id-cells = <1>;
+        iommus = <&smmu>;
+};
+
+&prg1 {
+        xen,passthrough;
+};
+
+&prg2 {
+        xen,passthrough;
+};
+
+&prg3 {
+        xen,passthrough;
+};
+
+&prg4 {
+        xen,passthrough;
+};
+
+&prg5 {
+        xen,passthrough;
+};
+
+&prg6 {
+        xen,passthrough;
+};
+
+&prg7 {
+        xen,passthrough;
+};
+
+&prg8 {
+        xen,passthrough;
+};
+
+&prg9 {
+        xen,passthrough;
+};
+
+&dpr1_channel1 {
+	xen,passthrough;
+};
+
+&dpr1_channel2 {
+        xen,passthrough;
+};
+
+&dpr1_channel3 {
+        xen,passthrough;
+};
+
+&dpr2_channel1 {
+        xen,passthrough;
+};
+
+&dpr2_channel2 {
+        xen,passthrough;
+};
+
+&dpr2_channel3 {
+        xen,passthrough;
 };
 
 &dpu2_intsteer {
@@ -393,3 +516,16 @@
         xen,shared;
 };
 
+&mipi_dsi_phy1 {
+        status = "disabled";
+	xen,passthrough;
+};
+
+&mipi_dsi1 {
+	xen,passthrough;
+};
+
+&mipi_dsi_bridge1 {
+        status = "disabled";
+	xen,passthrough;
+};
