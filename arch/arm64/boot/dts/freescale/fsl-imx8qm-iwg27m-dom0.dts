@@ -121,6 +121,19 @@
 				SC_P_UART1_RTS_B
 				SC_P_QSPI1A_DQS
 				>;
+                        gpios = <&gpio1 13 GPIO_ACTIVE_LOW>,
+                                <&gpio1 27 GPIO_ACTIVE_LOW>,
+                                <&gpio1 28 GPIO_ACTIVE_LOW>,
+                                <&gpio4 6 GPIO_ACTIVE_LOW>,
+                                <&gpio4 9 GPIO_ACTIVE_LOW>,
+                                <&gpio4 11 GPIO_ACTIVE_HIGH>,
+                                <&gpio4 19 GPIO_ACTIVE_HIGH>,
+                                <&gpio4 22 GPIO_ACTIVE_LOW>,
+                                <&gpio4 26 GPIO_ACTIVE_HIGH>,
+                                <&gpio4 25 GPIO_ACTIVE_HIGH>,
+                                <&gpio4 27 GPIO_ACTIVE_LOW>,
+                                <&gpio4 29 GPIO_ACTIVE_LOW>;
+
 		};
 	};
 
@@ -370,6 +383,10 @@
 &usbphy1 {
 	reg = <0x0 0x5b100000 0x0 0x1000>;
 	xen,passthrough;
+};
+
+&gpio1 {
+        xen,shared;
 };
 
 &gpio4 {

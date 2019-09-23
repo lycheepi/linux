@@ -446,7 +446,7 @@
 };
 &gpio1 {
 	/delete-property/ power-domains;
-	status = "disabled";
+	status = "okay";
 };
 &gpio2 {
 	/delete-property/ power-domains;
@@ -458,7 +458,7 @@
 };
 &gpio4 {
 	/delete-property/ power-domains;
-	status = "disabled";
+	status = "okay";
 };
 &gpio5 {
 	/delete-property/ power-domains;
@@ -562,7 +562,10 @@
 /delete-node/ &pciea;
 /delete-node/ &pcieb;
 /delete-node/ &sata;
-
+/*
+/delete-node/ &intmux_cm40;
+/delete-node/ &intmux_cm41;
+*/
 &rpmsg1{
 	/*
 	 * 64K for one rpmsg instance:
