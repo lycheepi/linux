@@ -36,9 +36,11 @@
 		mmc0 = &usdhc1;
 		dpu0 = &dpu1;
 		dpu1 = &dpu2;
+		dsi_phy0 = &mipi_dsi_phy1;
+		mipi_dsi0 = &mipi_dsi1;
 		ldb0 = &ldb1;
 		ldb1 = &ldb2;
-                serial1 = &lpuart1;
+		serial1 = &lpuart1;
 	};
 
 	cpus {
@@ -70,6 +72,21 @@
                         compatible = "arm,armv8";
                         enable-method = "psci";
                         reg = <0x0 0x3>;
+                };
+	};
+
+        regulators {
+                compatible = "simple-bus";
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                reg_touch: regulator@0 {
+                        compatible = "regulator-fixed";
+                        reg = <2>;
+                        regulator-name = "touch-en";
+                        regulator-min-microvolt = <3300000>;
+                        regulator-max-microvolt = <3300000>;
+                        regulator-always-on;
                 };
 	};
 
@@ -315,9 +332,6 @@
 			/delete-property/ remote-endpoint;
 		};
 
-                dpu1_disp0_mipi_dsi: mipi-dsi-endpoint {
-                        /delete-property/ remote-endpoint;
-                };
         };
         dpu1_disp1: port@1 {
                 reg = <1>;
@@ -438,10 +452,6 @@
 /delete-node/ &hdmi;
 /delete-node/ &irqsteer_dsi0;
 /delete-node/ &i2c0_mipi_dsi0;
-/delete-node/ &mipi_dsi_csr1;
-/delete-node/ &mipi_dsi_phy1;
-/delete-node/ &mipi_dsi1;
-/delete-node/ &mipi_dsi_bridge1;
 */
 
 &lvds_region1 {
@@ -528,15 +538,12 @@
 /delete-node/ &mipi_dsi2;
 /delete-node/ &mipi_dsi_bridge2;
 /* /delete-node/ &lvds_region1;
-/delete-node/ &ldb1_phy;
-/delete-node/ &ldb1;
 /delete-node/ &lvds1_pwm;
 */
 
 /delete-node/ &camera;
 /delete-node/ &i2c0;
 /delete-node/ &i2c1;
-/delete-node/ &i2c2;
 /delete-node/ &i2c3;
 /delete-node/ &i2c4;
 /delete-node/ &i2c0_cm40;
@@ -586,7 +593,7 @@
 
 &gpio0 {
 	/delete-property/ power-domains;
-	status = "disabled";
+	status = "okay";
 };
 &gpio1 {
 	/delete-property/ power-domains;
@@ -795,6 +802,13 @@
 			>;
 		};
 
+                pinctrl_lpi2c2: lpi2c2grp {
+                        fsl,pins = <
+                                SC_P_GPT1_CLK_DMA_I2C2_SCL                      0xc600004c
+                                SC_P_GPT1_CAPTURE_DMA_I2C2_SDA                  0xc600004c
+                        >;
+                };
+
 		pinctrl_lpuart1: lpuart1grp {
 			fsl,pins = <
 				SC_P_UART1_RX_DMA_UART1_RX		0x06000020
@@ -804,6 +818,19 @@
 				SC_P_QSPI1A_DQS_LSIO_GPIO4_IO22		0x00000021
 			>;
 		};
+
+                pinctrl_mipi_dsi: mipidsi {
+                        fsl,pins = <
+                                SC_P_SIM0_PD_LSIO_GPIO0_IO03                    0x00000021
+                        >;
+                };
+
+                pinctrl_ts_active_iwg27m: touch {
+                        fsl,pins = <
+                                SC_P_SIM0_RST_LSIO_GPIO0_IO01                   0x00000021
+                                SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10               0x18300021
+                        >;
+                };
 	};
 };
 
@@ -835,7 +862,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lvds1_lpi2c1>;
 	clock-frequency = <100000>;
-	status = "okay";
+	status = "disabled";
 
 	lvds-to-hdmi-bridge@4c {
 		compatible = "ite,it6263";
@@ -850,14 +877,82 @@
 		};
 	};
 };
-/*
+
+&irqsteer_dsi0 {
+	status = "okay";
+};
+
+&mipi_dsi_csr1 {
+	status = "okay";
+};
+
 &mipi_dsi_phy1 {
         status = "okay";
 };
 
 &mipi_dsi1 {
+	status = "okay";
 };
 
 &mipi_dsi_bridge1 {
         status = "okay";
-};*/
+
+        panel@0 {
+                reg = <0>;
+		compatible = "raydium,rm67198";
+                pinctrl-0 = <&pinctrl_mipi_dsi>;
+                reset-gpio = <&gpio0 3 GPIO_ACTIVE_LOW>;
+                dsi-lanes = <4>;
+                panel-width-mm = <68>;
+                panel-height-mm = <121>;
+                port {
+                        panel1_in: endpoint {
+                                remote-endpoint = <&mipi_bridge1_out>;
+                        };
+                };
+        };
+
+        port@1 {
+                mipi_bridge1_out: endpoint {
+                        remote-endpoint = <&panel1_in>;
+                };
+        };
+};
+
+&i2c2 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_lpi2c2>;
+        clock-frequency = <400000>;
+        status = "okay";
+
+        cst148@1a {
+                compatible = "hynitron,cst1xx";
+                reg = <0x1a>;
+                interrupt-parent = <&gpio0>;
+                interrupts = <1 2>;
+                vdd_ana-supply = <&reg_touch>;
+                vcc_i2c-supply = <&reg_touch>;
+                hynitron,panel-coords = <0 1080 0 1920>;
+                hynitron,display-coords = <0 1080 0 1920>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_ts_active_iwg27m>;
+                hynitron,irq-gpio = <&gpio0 1 0>;
+                hynitron,rst-gpio = <&gpio0 10 0>;
+                report_type = <1>;
+        };
+/*
+        goodix@5d {
+                compatible = "goodix,gt1x";
+                reg = <0x5d>;
+                interrupt-parent = <&gpio0>;
+                interrupts = <1 2>;
+                vdd_ana-supply = <&reg_touch>;
+                vcc_i2c-supply = <&reg_touch>;
+                pinctrl-names = "ts_active";
+                pinctrl-0 = <&pinctrl_ts_active_iwg27m>;
+                goodix,irq-gpio = <&gpio0 1 GPIO_ACTIVE_LOW>;
+        };
+*/
+};

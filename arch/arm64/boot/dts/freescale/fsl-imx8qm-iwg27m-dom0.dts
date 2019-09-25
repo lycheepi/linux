@@ -100,6 +100,11 @@
 				SC_R_DC_1_FRAC1
 				SC_R_DC_1_PLL_0
 				SC_R_DC_1_PLL_1
+				/* mipi 0 */
+                                SC_R_MIPI_0
+                                SC_R_MIPI_0_I2C_0
+                                SC_R_MIPI_0_I2C_1
+				SC_R_MIPI_0_PWM_0
 				SC_R_MIPI_1
 				SC_R_MIPI_1_I2C_0
 				SC_R_MIPI_1_I2C_1
@@ -113,8 +118,24 @@
 				SC_R_DMA_0_CH14
 				SC_R_DMA_0_CH15
 				SC_R_MU_2A
+                                /* pcie */
+                                SC_R_PCIE_B
+                                SC_R_PCIE_A
+                                SC_R_SERDES_0
+                                SC_R_HSIO_GPIO
+                                /* i2c2 */
+				SC_R_I2C_2
 				>;
 			pads = <
+                                /* i2c1_lvds1 */
+                                SC_P_LVDS1_I2C1_SCL
+                                SC_P_LVDS1_I2C1_SDA
+				/* mipi_dsi0 */
+				SC_P_MIPI_DSI0_I2C0_SCL
+				SC_P_MIPI_DSI0_I2C0_SDA
+				/* mipi_dsi1 */
+				SC_P_MIPI_DSI1_I2C0_SCL
+				SC_P_MIPI_DSI1_I2C0_SDA
 				/* emmc */
 				SC_P_EMMC0_CLK
 				SC_P_EMMC0_CMD
@@ -136,8 +157,19 @@
 				SC_P_UART1_CTS_B
 				SC_P_UART1_RTS_B
 				SC_P_QSPI1A_DQS
+				/* mipi dsi 1 */
+				SC_P_SIM0_PD_LSIO_GPIO0_IO03
+				/* i2c2 */
+				SC_P_GPT1_CLK_DMA_I2C2_SCL
+				SC_P_GPT1_CAPTURE_DMA_I2C2_SDA
+				/* pinctrl_ts_active_iwg27m */
+				SC_P_SIM0_RST_LSIO_GPIO0_IO01
+				SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10
 				>;
-                        gpios = <&gpio1 13 GPIO_ACTIVE_LOW>,
+                        gpios = <&gpio0 1 0>,
+				<&gpio0 3 GPIO_ACTIVE_LOW>,
+				<&gpio0 10 0>,
+				<&gpio1 13 GPIO_ACTIVE_LOW>,
                                 <&gpio1 27 GPIO_ACTIVE_LOW>,
                                 <&gpio1 28 GPIO_ACTIVE_LOW>,
                                 <&gpio4 6 GPIO_ACTIVE_LOW>,
@@ -508,12 +540,25 @@
 	xen,passthrough;
 };
 
+&gpio0 {
+	xen,shared;
+};
+
 &gpio1 {
         xen,shared;
 };
 
 &gpio4 {
         xen,shared;
+};
+
+&irqsteer_dsi0 {
+	xen,passthrough;
+};
+
+&mipi_dsi_csr1 {
+        status = "disabled";
+        xen,passthrough;
 };
 
 &mipi_dsi_phy1 {
@@ -527,5 +572,9 @@
 
 &mipi_dsi_bridge1 {
         status = "disabled";
+	xen,passthrough;
+};
+
+&i2c2 {
 	xen,passthrough;
 };

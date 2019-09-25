@@ -110,6 +110,26 @@
 		reg = <0x0 0x57243000 0x0 0x1000>;
 	};
 
+        mipi_dsi0_lpcg: lpcg@56223000 {
+                compatible = "fsl,imx8qm-mipi-dsi0-lpcg";
+                reg = <0x0 0x56223000 0x0 0x1000>;
+        };
+
+        mipi_dsi1_lpcg: lpcg@57223000 {
+                compatible = "fsl,imx8qm-mipi-dsi1-lpcg";
+                reg = <0x0 0x57223000 0x0 0x1000>;
+        };
+
+	di_hdmi_lpcg: lpcg@56263000 {
+                compatible = "fsl,imx8qm-di-hdmi-lpcg";
+                reg = <0x0 0x56263000 0x0 0x1000>;
+        };
+
+	lpi2c_2_lpcg: lpcg@5ac20000 {
+		compatible = "fsl,imx8qm-lpi2c2-lpcg";
+                reg = <0x0 0x5ac20000 0x0 0x1000>;
+	};
+
 	dc_0_lpcg: lpcg@56010000 {
 		compatible = "fsl,imx8qm-dc0-lpcg";
 		reg = <0x0 0x56010000 0x0 0x10000>;
