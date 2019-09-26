@@ -61,6 +61,12 @@
 				SC_R_MU_2A
 			>;
 			rsrcs = <
+				/* gpu 0 */
+				SC_R_GPU_0_PID0
+                                SC_R_GPU_0_PID1
+                                SC_R_GPU_0_PID2
+                                SC_R_GPU_0_PID3
+				/* gpu 1 */
 				SC_R_GPU_1_PID0
 				SC_R_GPU_1_PID1
 				SC_R_GPU_1_PID2
@@ -109,8 +115,12 @@
 				SC_R_MIPI_1_I2C_0
 				SC_R_MIPI_1_I2C_1
 				SC_R_MIPI_1_PWM_0
+				/* hdmi */
 				SC_R_HDMI
+				SC_R_HDMI_PLL_0
+				SC_R_HDMI_PLL_1
 				SC_R_HDMI_I2C_0
+				SC_R_HDMI_I2S
 				SC_R_SDHC_0
 				SC_R_USB_0
 				SC_R_USB_0_PHY
@@ -123,8 +133,26 @@
                                 SC_R_PCIE_A
                                 SC_R_SERDES_0
                                 SC_R_HSIO_GPIO
+				/* i2c1 */
+				SC_R_I2C_1
                                 /* i2c2 */
 				SC_R_I2C_2
+				/* sai 1 */
+				SC_R_SAI_1
+				SC_R_DMA_2_CH14
+				SC_R_DMA_2_CH15
+				/* sai 4 - hdmi */
+				SC_R_SAI_4
+				SC_R_DMA_2_CH18
+				/* sai 5 - sai_hdmi_tx */
+				SC_R_SAI_5
+				SC_R_DMA_2_CH19
+				/* audio */
+				SC_R_AUDIO_PLL_0
+				SC_R_AUDIO_PLL_1
+				SC_R_AUDIO_CLK_0
+				SC_R_AUDIO_CLK_1
+				SC_R_MCLK_OUT_0
 				>;
 			pads = <
                                 /* i2c1_lvds1 */
@@ -165,14 +193,31 @@
 				/* pinctrl_ts_active_iwg27m */
 				SC_P_SIM0_RST_LSIO_GPIO0_IO01
 				SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10
+				/* sai1 */
+				SC_P_SAI1_RXD_AUD_SAI1_RXD
+				SC_P_SAI1_TXC_AUD_SAI1_TXC
+				SC_P_SAI1_TXD_AUD_SAI1_TXD
+				SC_P_SAI1_TXFS_AUD_SAI1_TXFS
+				SC_P_MCLK_OUT0_AUD_ACM_MCLK_OUT0
+				/* pinctrl_hp_mic_detect */
+				SC_P_SIM0_IO_LSIO_GPIO0_IO02
+				SC_P_SIM0_GPIO0_00_LSIO_GPIO0_IO05
+				/* i2c1 */
+				SC_P_GPT0_CLK_DMA_I2C1_SCL
+				SC_P_GPT0_CAPTURE_DMA_I2C1_SDA
 				>;
                         gpios = <&gpio0 1 0>,
+				<&gpio0 2 GPIO_ACTIVE_LOW>,
 				<&gpio0 3 GPIO_ACTIVE_LOW>,
+				<&gpio0 5 GPIO_ACTIVE_LOW>,
 				<&gpio0 10 0>,
 				<&gpio1 13 GPIO_ACTIVE_LOW>,
+				<&gpio1 19 GPIO_ACTIVE_HIGH>,
                                 <&gpio1 27 GPIO_ACTIVE_LOW>,
                                 <&gpio1 28 GPIO_ACTIVE_LOW>,
+				<&gpio1 30 GPIO_ACTIVE_LOW>,
                                 <&gpio4 6 GPIO_ACTIVE_LOW>,
+				<&gpio4 7 GPIO_ACTIVE_HIGH>,
                                 <&gpio4 9 GPIO_ACTIVE_LOW>,
                                 <&gpio4 11 GPIO_ACTIVE_HIGH>,
                                 <&gpio4 19 GPIO_ACTIVE_HIGH>,
@@ -285,17 +330,52 @@
 };
 
 &edma01 {
-	#stream-id-cells = <1>;
-	xen,passthrough;
-	fsl,sc_rsrc_id = <SC_R_DMA_0_CH14>,
-			 <SC_R_DMA_0_CH15>;
+        #stream-id-cells = <1>;
+        xen,passthrough;
+};
+
+&edma20 {
+        #stream-id-cells = <1>;
+        xen,passthrough;
+        /* Put edma20 and edma21 resource here */
+        fsl,sc_rsrc_id = <SC_R_DMA_2_CH0>,
+                         <SC_R_DMA_2_CH1>,
+                         <SC_R_DMA_2_CH2>,
+                         <SC_R_DMA_2_CH3>,
+                         <SC_R_DMA_2_CH4>,
+                         <SC_R_DMA_2_CH5>,
+                         <SC_R_DMA_2_CH6>,
+                         <SC_R_DMA_2_CH7>,
+                         <SC_R_DMA_2_CH12>,
+                         <SC_R_DMA_2_CH13>,
+			 <SC_R_DMA_2_CH14>,
+			 <SC_R_DMA_2_CH15>,
+			 <SC_R_DMA_2_CH18>,
+			 <SC_R_DMA_2_CH19>;
+};
+
+&edma21 {
+        xen,passthrough;
+};
+
+&edma24 {
+        xen,passthrough;
+};
+
+&edma25 {
+        xen,passthrough;
+};
+
+&edma26 {
+        xen,passthrough;
 };
 
 /* SMMU */
 &smmu {
 	mmu-masters = <&dpu2 0x13>, <&dpu1 0x14>, <&gpu_3d1 0x15>,
 		      <&usdhc1 0x12>, <&usbotg1 0x11>,
-		      <&edma01 0x10>;
+		      <&edma01 0x10>, <&gpu_3d0 0x9>,
+		      <&edma20 0x8>, <&hdmi 0x7>;
 };
 
 &lvds_region1 {
@@ -505,8 +585,19 @@
 	iommus = <&smmu>;
 };
 
+&pd_gpu0 {
+        xen,passthrough;
+};
+
+&gpu_3d0 {
+        xen,passthrough;
+        #stream-id-cells = <1>;
+        iommus = <&smmu>;
+};
+
 &imx8_gpu_ss {
-	cores = <&gpu_3d0>;
+	status = "disabled";
+	/delete-property/ cores;
 	/delete-property/ reg;
 	/delete-property/ reg-names;
 };
@@ -556,6 +647,8 @@
 	xen,passthrough;
 };
 
+/* lcd display */
+
 &mipi_dsi_csr1 {
         status = "disabled";
         xen,passthrough;
@@ -578,3 +671,40 @@
 &i2c2 {
 	xen,passthrough;
 };
+
+/* hdmi display */
+&sai1 {
+	status = "disabled";
+	xen,passthrough;
+};
+
+&i2c1 {
+	status = "disabled";
+	xen,passthrough;
+};
+
+/* hdmi */
+&hdmi {
+        xen,passthrough;
+        #stream-id-cells = <1>;
+        iommus = <&smmu>;
+        /*fsl,sc_rsrc_id = <SC_R_HDMI>,
+                         <SC_R_HDMI_RX>;*/
+};
+
+&irqsteer_hdmi {
+        xen,passthrough;
+};
+
+&i2c0_hdmi {
+        xen,passthrough;
+};
+
+&sai_hdmi_rx {
+        xen,passthrough;
+};
+
+&sai_hdmi_tx {
+        xen,passthrough;
+};
+
