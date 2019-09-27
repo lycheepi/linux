@@ -225,7 +225,7 @@
 
 &dpu2_intsteer {
 	reg = <0x0 0x57000000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &prg10 {
@@ -275,37 +275,37 @@
 
 &dpr3_channel1 {
 	reg = <0x0 0x570d0000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &dpr3_channel2 {
 	reg = <0x0 0x570e0000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &dpr3_channel3 {
 	reg = <0x0 0x570f0000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &dpr4_channel1 {
 	reg = <0x0 0x57100000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &dpr4_channel2 {
 	reg = <0x0 0x57110000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &dpr4_channel3 {
 	reg = <0x0 0x57120000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &dpu2 {
 	reg = <0x0 0x57180000 0x0 0x40000>;
-	status = "disabled";
+	status = "okay";
 
 	dpu2_disp0: port@0 {
 		dpu2_disp0_mipi_dsi: mipi-dsi-endpoint {
@@ -335,16 +335,16 @@
 
 &lvds_region2 {
 	reg = <0x0 0x57240000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &ldb2_phy {
 	reg = <0x0 0x57241000 0x0 0x100>;
-	status = "disabled";
+	status = "okay";
 };
 
 &ldb2 {
-	status = "disabled";
+	status = "okay";
 
 	lvds-channel@0 {
 		fsl,data-mapping = "jeida";
@@ -412,7 +412,7 @@
 
 &i2c1_lvds1 {
 	reg = <0x0 0x57247000 0x0 0x1000>;
-	status = "disabled";
+	status = "okay";
 };
 
 /delete-node/ &irqsteer_lvds0;
@@ -572,7 +572,7 @@
 	 */
 	vdev-nums = <1>;
 	reg = <0x0 0x90100000 0x0 0x10000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &mu_rpmsg1 {

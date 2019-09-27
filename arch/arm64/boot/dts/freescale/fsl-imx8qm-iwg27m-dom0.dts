@@ -88,8 +88,6 @@
 				SC_R_MIPI_1_I2C_0
 				SC_R_MIPI_1_I2C_1
 				SC_R_MIPI_1_PWM_0
-				SC_R_HDMI
-				SC_R_HDMI_I2C_0
 				SC_R_SDHC_0
 				SC_R_USB_0
 				SC_R_USB_0_PHY
@@ -99,6 +97,9 @@
 				SC_R_MU_2A
 				>;
 			pads = <
+                                /* i2c1_lvds1 */
+                                SC_P_LVDS1_I2C1_SCL
+                                SC_P_LVDS1_I2C1_SDA
 				/* emmc */
 				SC_P_EMMC0_CLK
 				SC_P_EMMC0_CMD
@@ -120,6 +121,41 @@
 				SC_P_UART1_CTS_B
 				SC_P_UART1_RTS_B
 				SC_P_QSPI1A_DQS
+                                /* pciea */
+                                SC_P_PCIE_CTRL0_CLKREQ_B
+                                SC_P_PCIE_CTRL0_WAKE_B
+                                SC_P_PCIE_CTRL0_PERST_B
+                                SC_P_LVDS1_I2C0_SDA
+                                SC_P_USDHC2_RESET_B
+                                /*usbotgs typec */
+                                SC_P_QSPI1A_SS0_B
+                                SC_P_USB_SS3_TC3
+                                SC_P_QSPI1A_DATA0
+                                /* isl29023 */
+                                SC_P_USDHC2_WP
+                                SC_P_MIPI_CSI0_GPIO0_00
+                                SC_P_MIPI_CSI0_GPIO0_01
+
+                                /* SAI0 */
+                                SC_P_SPI0_CS1
+                                SC_P_SPI2_CS1
+                                SC_P_SAI1_RXFS
+                                SC_P_SAI1_RXC
+
+                                /* ESAI0 */
+                                SC_P_ESAI0_FSR
+                                SC_P_ESAI0_FST
+                                SC_P_ESAI0_SCKR
+                                SC_P_ESAI0_SCKT
+                                SC_P_ESAI0_TX0
+                                SC_P_ESAI0_TX1
+                                SC_P_ESAI0_TX2_RX3
+                                SC_P_ESAI0_TX3_RX2
+                                SC_P_ESAI0_TX4_RX1
+                                SC_P_ESAI0_TX5_RX0
+
+                                /* lvds pwm */
+                                SC_P_LVDS1_GPIO00
 				>;
                         gpios = <&gpio1 13 GPIO_ACTIVE_LOW>,
                                 <&gpio1 27 GPIO_ACTIVE_LOW>,
