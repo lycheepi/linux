@@ -35,11 +35,9 @@
 	aliases {
 		mmc0 = &usdhc1;
 		dpu0 = &dpu1;
-		dpu1 = &dpu2;
 		dsi_phy0 = &mipi_dsi_phy1;
 		mipi_dsi0 = &mipi_dsi1;
 		ldb0 = &ldb1;
-		ldb1 = &ldb2;
 		serial1 = &lpuart1;
 	};
 
@@ -328,10 +326,6 @@
 
         dpu1_disp0: port@0 {
 
-		dpu1_disp0_hdmi: hdmi-endpoint {
-			/delete-property/ remote-endpoint;
-		};
-
         };
         dpu1_disp1: port@1 {
                 reg = <1>;
@@ -346,110 +340,26 @@
         };
 };
 
-&dpu2_intsteer {
-	reg = <0x0 0x57000000 0x0 0x10000>;
-	status = "disabled";
-};
+/delete-node/ &dpu2;
+/delete-node/ &dpr4_channel3;
+/delete-node/ &dpr4_channel2;
+/delete-node/ &dpr4_channel1;
+/delete-node/ &dpr3_channel3;
+/delete-node/ &dpr3_channel2;
+/delete-node/ &dpr3_channel1;
+/delete-node/ &dpu2_intsteer;
+/delete-node/ &prg10;
+/delete-node/ &prg11;
+/delete-node/ &prg12;
+/delete-node/ &prg13;
+/delete-node/ &prg14;
+/delete-node/ &prg15;
+/delete-node/ &prg16;
+/delete-node/ &prg17;
+/delete-node/ &prg18;
 
-&prg10 {
-	reg = <0x0 0x57040000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg11 {
-	reg = <0x0 0x57050000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg12 {
-	reg = <0x0 0x57060000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg13 {
-	reg = <0x0 0x57070000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg14 {
-	reg = <0x0 0x57080000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg15 {
-	reg = <0x0 0x57090000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg16 {
-	reg = <0x0 0x570a0000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg17 {
-	reg = <0x0 0x570b0000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&prg18 {
-	reg = <0x0 0x570c0000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpr3_channel1 {
-	reg = <0x0 0x570d0000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpr3_channel2 {
-	reg = <0x0 0x570e0000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpr3_channel3 {
-	reg = <0x0 0x570f0000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpr4_channel1 {
-	reg = <0x0 0x57100000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpr4_channel2 {
-	reg = <0x0 0x57110000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpr4_channel3 {
-	reg = <0x0 0x57120000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&dpu2 {
-	reg = <0x0 0x57180000 0x0 0x40000>;
-	status = "disabled";
-
-	dpu2_disp0: port@0 {
-		dpu2_disp0_mipi_dsi: mipi-dsi-endpoint {
-			/delete-property/ remote-endpoint;
-		};
-	};
-	dpu2_disp1: port@1 {
-		reg = <1>;
-
-		dpu2_disp1_lvds0: lvds0-endpoint {
-			remote-endpoint = <&ldb2_lvds0>;
-		};
-
-		dpu2_disp1_lvds1: lvds1-endpoint {
-			remote-endpoint = <&ldb2_lvds1>;
-		};
-	};
-};
-
-/*
 /delete-node/ &hdmi;
+/*
 /delete-node/ &irqsteer_dsi0;
 /delete-node/ &i2c0_mipi_dsi0;
 */
@@ -482,34 +392,9 @@
         };
 };
 
-&lvds_region2 {
-	reg = <0x0 0x57240000 0x0 0x10000>;
-	status = "disabled";
-};
-
-&ldb2_phy {
-	reg = <0x0 0x57241000 0x0 0x100>;
-	status = "disabled";
-};
-
-&ldb2 {
-	status = "disabled";
-
-	lvds-channel@0 {
-		fsl,data-mapping = "jeida";
-		fsl,data-width = <24>;
-		status = "okay";
-
-		port@1 {
-			reg = <1>;
-
-			lvds2_out: endpoint {
-				remote-endpoint = <&it6263_1_in>;
-			};
-		};
-	};
-};
-
+/delete-node/ &lvds_region2;
+/delete-node/ &ldb2_phy;
+/delete-node/ &ldb2;
 /*
 /delete-node/ &lvds0_pwm;
 /delete-node/ &dpu1_intsteer;

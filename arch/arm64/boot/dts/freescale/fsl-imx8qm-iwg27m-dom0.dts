@@ -109,8 +109,9 @@
 				SC_R_MIPI_1_I2C_0
 				SC_R_MIPI_1_I2C_1
 				SC_R_MIPI_1_PWM_0
+/*
 				SC_R_HDMI
-				SC_R_HDMI_I2C_0
+				SC_R_HDMI_I2C_0*/
 				SC_R_SDHC_0
 				SC_R_USB_0
 				SC_R_USB_0_PHY
@@ -196,12 +197,12 @@
 		};
 	};
 
-	/*
+	
 	display-subsystem {
 		compatible = "fsl,imx-display-subsystem";
-		ports = <&dpu1_disp0>, <&dpu1_disp1>;
+		ports = <&dpu2_disp0>, <&dpu2_disp1>;
 	};
-	*/
+	
 	/* Passthrough to domu */
 	mu2: mu@5d1d0000 {
 		compatible = "fsl,imx8-mu";
@@ -232,6 +233,12 @@
                 reg = <0x0 0x5d2a0000 0x0 0x10000>;
                 xen,passthrough;
         };
+};
+
+&hdmi {
+        pinctrl-names = "default";
+        compatible = "fsl,imx8qm-hdmi";
+        status = "okay";
 };
 
 &mu_6_lpcg {
@@ -293,7 +300,7 @@
 
 /* SMMU */
 &smmu {
-	mmu-masters = <&dpu2 0x13>, <&dpu1 0x14>, <&gpu_3d1 0x15>,
+	mmu-masters = <&dpu1 0x14>, <&gpu_3d1 0x15>,
 		      <&usdhc1 0x12>, <&usbotg1 0x11>,
 		      <&edma01 0x10>;
 };
@@ -344,14 +351,6 @@
 
 &ldb1 {
 	xen,passthrough;
-};
-
-&ldb2_phy {
-        xen,passthrough;
-};
-
-&ldb2 {
-        xen,passthrough;
 };
 
 &dpu1_intsteer {
@@ -422,76 +421,6 @@
 
 &dpr2_channel3 {
         xen,passthrough;
-};
-
-&dpu2_intsteer {
-	xen,passthrough;
-};
-
-&dpu2 {
-	xen,passthrough;
-	#stream-id-cells = <1>;
-	iommus = <&smmu>;
-};
-
-&prg10 {
-	xen,passthrough;
-};
-
-&prg11 {
-	xen,passthrough;
-};
-
-&prg12 {
-	xen,passthrough;
-};
-
-&prg13 {
-	xen,passthrough;
-};
-
-&prg14 {
-	xen,passthrough;
-};
-
-&prg15 {
-	xen,passthrough;
-};
-
-&prg16 {
-	xen,passthrough;
-};
-
-&prg17 {
-	xen,passthrough;
-};
-
-&prg18 {
-	xen,passthrough;
-};
-
-&dpr3_channel1 {
-	xen,passthrough;
-};
-
-&dpr3_channel2 {
-	xen,passthrough;
-};
-
-&dpr3_channel3 {
-	xen,passthrough;
-};
-
-&dpr4_channel1 {
-	xen,passthrough;
-};
-
-&dpr4_channel2 {
-	xen,passthrough;
-};
-
-&dpr4_channel3 {
-	xen,passthrough;
 };
 
 /* GPU */
@@ -578,3 +507,10 @@
 &i2c2 {
 	xen,passthrough;
 };
+
+&hdmi {
+        compatible = "fsl,imx8qm-hdmi";
+        fsl,cec;
+        status = "okay";
+};
+
