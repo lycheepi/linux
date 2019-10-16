@@ -158,13 +158,18 @@
 				SC_P_UART1_RTS_B
 				SC_P_QSPI1A_DQS
 				/* mipi dsi 1 */
-				SC_P_SIM0_PD_LSIO_GPIO0_IO03
+				/* SC_P_SIM0_PD_LSIO_GPIO0_IO03*/
+				SC_P_SIM0_PD
 				/* i2c2 */
-				SC_P_GPT1_CLK_DMA_I2C2_SCL
-				SC_P_GPT1_CAPTURE_DMA_I2C2_SDA
+				/* SC_P_GPT1_CLK_DMA_I2C2_SCL */
+				SC_P_GPT1_CLK
+				/*SC_P_GPT1_CAPTURE_DMA_I2C2_SDA*/
+				SC_P_GPT1_CAPTURE
 				/* pinctrl_ts_active_iwg27m */
-				SC_P_SIM0_RST_LSIO_GPIO0_IO01
-				SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10
+				/*SC_P_SIM0_RST_LSIO_GPIO0_IO01*/
+				SC_P_SIM0_RST
+				/*SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10*/
+				SC_P_M41_I2C0_SCL
 				>;
                         gpios = <&gpio0 1 0>,
 				<&gpio0 3 GPIO_ACTIVE_LOW>,
@@ -577,4 +582,10 @@
 
 &i2c2 {
 	xen,passthrough;
+	cst148@1a {
+		xen,passthrough;
+	};
+	goodix@5d {
+		xen,passthrough;
+	};
 };

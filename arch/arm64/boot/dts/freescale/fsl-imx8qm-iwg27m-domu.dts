@@ -75,21 +75,6 @@
                 };
 	};
 
-        regulators {
-                compatible = "simple-bus";
-                #address-cells = <1>;
-                #size-cells = <0>;
-
-                reg_touch: regulator@0 {
-                        compatible = "regulator-fixed";
-                        reg = <2>;
-                        regulator-name = "touch-en";
-                        regulator-min-microvolt = <3300000>;
-                        regulator-max-microvolt = <3300000>;
-                        regulator-always-on;
-                };
-	};
-
 	psci {
 		compatible = "arm,psci-1.0";
 		method = "hvc";
@@ -206,6 +191,21 @@
 			compatible = "fsl,imx8qm-iomuxc";
 		};
 
+	        regulators {
+	                compatible = "simple-bus";
+	                #address-cells = <1>;
+	                #size-cells = <0>;
+
+	                reg_touch: regulator@0 {
+	                        compatible = "regulator-fixed";
+	                        reg = <2>;
+	                        regulator-name = "touch-en";
+	                        regulator-min-microvolt = <3300000>;
+	                        regulator-max-microvolt = <3300000>;
+	                        regulator-always-on;
+	                };
+	        };
+
 		#include "fsl-imx8qm-device.dtsi"
 
 		mu2: mu@5d1d0000 {
@@ -231,6 +231,7 @@
 			interrupt-names = "edma0-chan14-rx", "edma0-chan15-tx";
 			status = "okay";
 		};
+
 	};
 };
 
