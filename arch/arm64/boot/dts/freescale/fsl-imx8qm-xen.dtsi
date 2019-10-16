@@ -362,7 +362,7 @@
         };
 
         aud_sai_1_lpcg: aud_sai_1_lpcg {
-                reg = <0x0 0x59460000 0x0 0x1000>;
+                reg = <0x0 0x59450000 0x0 0x1000>;
         };
 };
 
