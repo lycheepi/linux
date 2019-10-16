@@ -232,6 +232,25 @@
 			status = "okay";
 		};
 
+                xen_i2c0: xen_i2c@0 {
+                        compatible = "xen,i2c";
+                        be-adapter = "5a800000.i2c";
+                        status = "okay";
+                };
+/*
+                xen_i2c1: xen_i2c@1 {
+                        compatible = "xen,i2c";
+                        be-adapter = "5a810000.i2c";
+                        status = "okay";
+                };
+*/
+                xen_i2c2: xen_i2c@2 {
+                        compatible = "xen,i2c";
+                        be-adapter = "5a820000.i2c";
+                        status = "okay";
+                };
+
+
 	};
 };
 
@@ -545,6 +564,7 @@
 /delete-node/ &camera;
 /delete-node/ &i2c0;
 /delete-node/ &i2c1;
+/delete-node/ &i2c2;
 /delete-node/ &i2c3;
 /delete-node/ &i2c4;
 /delete-node/ &i2c0_cm40;
@@ -803,13 +823,6 @@
 			>;
 		};
 
-                pinctrl_lpi2c2: lpi2c2grp {
-                        fsl,pins = <
-                                SC_P_GPT1_CLK_DMA_I2C2_SCL                      0xc600004c
-                                SC_P_GPT1_CAPTURE_DMA_I2C2_SDA                  0xc600004c
-                        >;
-                };
-
 		pinctrl_lpuart1: lpuart1grp {
 			fsl,pins = <
 				SC_P_UART1_RX_DMA_UART1_RX		0x06000020
@@ -920,11 +933,9 @@
         };
 };
 
-&i2c2 {
+&xen_i2c2 {
         #address-cells = <1>;
         #size-cells = <0>;
-        pinctrl-names = "default";
-        pinctrl-0 = <&pinctrl_lpi2c2>;
         clock-frequency = <400000>;
         status = "okay";
 
@@ -942,6 +953,7 @@
                 hynitron,irq-gpio = <&gpio0 1 0>;
                 hynitron,rst-gpio = <&gpio0 10 0>;
                 report_type = <1>;
+		status = "okay";
         };
 /*
         goodix@5d {
@@ -957,3 +969,36 @@
         };
 */
 };
+/*
+&xen_i2c1 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        clock-frequency = <400000>;
+        status = "okay";
+
+        codec: sgtl5000@0a {
+                compatible = "fsl,sgtl5000";
+                reg = <0x0a>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_hp_mic_detect>;
+                clocks = <&audioclk 0>;
+                VDDA-supply = <&reg_1p8v>;
+                VDDIO-supply = <&reg_1p8v>;
+                VDDD-supply = <&reg_1p5v>;
+                power-domains = <&pd_mclk_out0>;
+                hp-det-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+                mic-det-gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
+                status = "okay";
+        };
+
+        fusb30x@22 {
+                compatible = "fairchild,fusb302";
+                reg = <0x22>;
+                fairchild,int_n = <&gpio0 0 0>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_type_c>;
+                fairchild,cc = <&gpio5 23 0>;
+                status = "okay";
+        };
+};
+*/

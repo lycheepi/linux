@@ -60,6 +60,29 @@
 			init_on_rsrcs = <
 				SC_R_MU_2A
 			>;
+                        /* Resources that will be transferred between
+                         * M41 and AP, when support android auto.
+                         */
+                        rsrcs-m41-ap = <
+                                SC_R_CSI_0
+                                SC_R_CSI_0_PWM_0
+                                SC_R_CSI_0_I2C_0
+                                SC_R_LVDS_1
+                                SC_R_LVDS_1_I2C_0
+                                SC_R_LVDS_1_PWM_0
+                                SC_R_DC_1
+                                SC_R_DC_1_BLIT0
+                                SC_R_DC_1_BLIT1
+                                SC_R_DC_1_BLIT2
+                                SC_R_DC_1_BLIT_OUT
+                                SC_R_DC_1_WARP
+                                SC_R_DC_1_VIDEO0
+                                SC_R_DC_1_VIDEO1
+                                SC_R_DC_1_FRAC0
+                                SC_R_DC_1_PLL_0
+                                SC_R_DC_1_PLL_1
+                                SC_R_ISI_CH0
+                        >;
 			rsrcs = <
 				SC_R_GPU_1_PID0
 				SC_R_GPU_1_PID1
@@ -123,9 +146,15 @@
                                 SC_R_PCIE_A
                                 SC_R_SERDES_0
                                 SC_R_HSIO_GPIO
-                                /* i2c2 */
-				SC_R_I2C_2
 				>;
+                        /* Pads that will be transferred between M41 and AP */
+                        pads-m41-ap = <
+                                SC_P_LVDS1_I2C1_SCL
+                                SC_P_LVDS1_I2C1_SDA
+				SC_P_SIM0_PD
+				SC_P_SIM0_RST
+				SC_P_M41_I2C0_SCL
+                        >;
 			pads = <
                                 /* i2c1_lvds1 */
                                 SC_P_LVDS1_I2C1_SCL
@@ -160,11 +189,6 @@
 				/* mipi dsi 1 */
 				/* SC_P_SIM0_PD_LSIO_GPIO0_IO03*/
 				SC_P_SIM0_PD
-				/* i2c2 */
-				/* SC_P_GPT1_CLK_DMA_I2C2_SCL */
-				SC_P_GPT1_CLK
-				/*SC_P_GPT1_CAPTURE_DMA_I2C2_SDA*/
-				SC_P_GPT1_CAPTURE
 				/* pinctrl_ts_active_iwg27m */
 				/*SC_P_SIM0_RST_LSIO_GPIO0_IO01*/
 				SC_P_SIM0_RST
@@ -581,7 +605,6 @@
 };
 
 &i2c2 {
-	xen,passthrough;
 	cst148@1a {
 		xen,passthrough;
 	};
