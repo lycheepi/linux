@@ -146,6 +146,17 @@
                                 SC_R_PCIE_A
                                 SC_R_SERDES_0
                                 SC_R_HSIO_GPIO
+				/* sai 1 */
+				SC_R_SAI_1
+				SC_R_DMA_2_CH14
+				SC_R_DMA_2_CH15
+				/* codec */
+				SC_R_MCLK_OUT_1
+				SC_R_MCLK_OUT_0
+				SC_R_AUDIO_CLK_1
+				SC_R_AUDIO_CLK_0
+				SC_R_AUDIO_PLL_1
+				SC_R_AUDIO_PLL_0
 				>;
                         /* Pads that will be transferred between M41 and AP */
                         pads-m41-ap = <
@@ -194,9 +205,24 @@
 				SC_P_SIM0_RST
 				/*SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10*/
 				SC_P_M41_I2C0_SCL
+				/* */
+				SC_P_SIM0_CLK
+				SC_P_USDHC1_STROBE
+				/* pinctrl_hp_mic_detect */
+				SC_P_SIM0_IO
+				SC_P_SIM0_GPIO0_00
+				/* sai 1 */
+				SC_P_SAI1_RXD
+				SC_P_SAI1_TXC
+				SC_P_SAI1_TXD
+				SC_P_SAI1_TXFS
+				SC_P_MCLK_OUT0
 				>;
-                        gpios = <&gpio0 1 0>,
+                        gpios = <&gpio0 0 0>,
+				<&gpio0 1 0>,
+				<&gpio0 2 GPIO_ACTIVE_LOW>,
 				<&gpio0 3 GPIO_ACTIVE_LOW>,
+				<&gpio0 5 GPIO_ACTIVE_LOW>,
 				<&gpio0 10 0>,
 				<&gpio1 13 GPIO_ACTIVE_LOW>,
                                 <&gpio1 27 GPIO_ACTIVE_LOW>,
@@ -209,7 +235,8 @@
                                 <&gpio4 26 GPIO_ACTIVE_HIGH>,
                                 <&gpio4 25 GPIO_ACTIVE_HIGH>,
                                 <&gpio4 27 GPIO_ACTIVE_LOW>,
-                                <&gpio4 29 GPIO_ACTIVE_LOW>;
+                                <&gpio4 29 GPIO_ACTIVE_LOW>,
+				<&gpio5 23 0>;
 
 		};
 	};
@@ -320,11 +347,41 @@
 			 <SC_R_DMA_0_CH15>;
 };
 
+&edma20 {
+        #stream-id-cells = <1>;
+        xen,passthrough;
+        /* Put edma20 and edma21 resource here */
+        fsl,sc_rsrc_id = <SC_R_DMA_2_CH0>,
+                         <SC_R_DMA_2_CH1>,
+                         <SC_R_DMA_2_CH2>,
+                         <SC_R_DMA_2_CH3>,
+                         <SC_R_DMA_2_CH4>,
+                         <SC_R_DMA_2_CH5>,
+                         <SC_R_DMA_2_CH6>,
+                         <SC_R_DMA_2_CH7>,
+                         <SC_R_DMA_2_CH12>,
+                         <SC_R_DMA_2_CH13>,
+			 <SC_R_DMA_2_CH14>,
+			 <SC_R_DMA_2_CH15>;
+};
+
+&edma21 {
+        xen,passthrough;
+};
+
+&edma24 {
+        xen,passthrough;
+};
+
+&edma25 {
+	xen,passthrough;
+};
+
 /* SMMU */
 &smmu {
 	mmu-masters = <&dpu2 0x13>, <&dpu1 0x14>, <&gpu_3d1 0x15>,
 		      <&usdhc1 0x12>, <&usbotg1 0x11>,
-		      <&edma01 0x10>;
+		      <&edma01 0x10>, <&edma20 0x9>;
 };
 
 &lvds_region1 {
@@ -581,6 +638,10 @@
         xen,shared;
 };
 
+&gpio5 {
+        xen,shared;
+};
+
 &irqsteer_dsi0 {
 	xen,passthrough;
 };
@@ -604,6 +665,15 @@
 	xen,passthrough;
 };
 
+&i2c1 {
+	codec: sgtl5000@0a {
+		xen,passthrough;
+	};
+	fusb30x@22 {
+		xen,passthrough;
+	};
+};
+
 &i2c2 {
 	cst148@1a {
 		xen,passthrough;
@@ -611,4 +681,8 @@
 	goodix@5d {
 		xen,passthrough;
 	};
+};
+
+&sai1 {
+	xen,passthrough;
 };

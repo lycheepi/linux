@@ -124,7 +124,8 @@
                 };
 	};
 
-        sound {
+/*
+        sound: sound {
 		compatible = "fsl,imx-audio-sgtl5000";
                 model = "sgtl5000-audio";
                 ssi-controller = <&sai1>;
@@ -134,7 +135,7 @@
 				"Headphone Jack", "HP_OUT",
 				"LINE_IN", "Line In Jack";
 	};
-
+*/
 	sound-hdmi {
 		compatible = "fsl,imx-audio-cdnhdmi";
                 model = "imx-audio-hdmi";

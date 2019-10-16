@@ -191,6 +191,17 @@
 			compatible = "fsl,imx8qm-iomuxc";
 		};
 
+	        clocks {
+	                #address-cells = <1>;
+	                #size-cells = <0>;
+		        audioclk: ext26Mz {
+		                compatible = "fixed-clock";
+		                clock-frequency = <26000000>;
+		                reg=<0>;
+		                #clock-cells = <0>;
+        	        };
+	        };
+
 	        regulators {
 	                compatible = "simple-bus";
 	                #address-cells = <1>;
@@ -204,7 +215,45 @@
 	                        regulator-max-microvolt = <3300000>;
 	                        regulator-always-on;
 	                };
+
+	                reg_3p3v: 3p3v {
+	                        compatible = "regulator-fixed";
+	                        regulator-name = "3P3V";
+	                        regulator-min-microvolt = <3300000>;
+	                        regulator-max-microvolt = <3300000>;
+	                        regulator-always-on;
+	                        regulator-boot-on;
+	                };
+
+	                reg_1p5v: 1p5v {
+	                        compatible = "regulator-fixed";
+	                        regulator-name = "1P5V";
+	                        regulator-min-microvolt = <1500000>;
+	                        regulator-max-microvolt = <1500000>;
+	                        regulator-always-on;
+	                };
+
+	                reg_1p8v: 1p8v {
+	                        compatible = "regulator-fixed";
+	                        regulator-name = "1P8V";
+	                        regulator-min-microvolt = <1800000>;
+	                        regulator-max-microvolt = <1800000>;
+	                        regulator-always-on;
+	                };
+
 	        };
+
+	        sound {
+	                compatible = "fsl,imx-audio-sgtl5000";
+	                model = "sgtl5000-audio";
+	                ssi-controller = <&sai1>;
+	                audio-codec = <&codec>;
+	                audio-routing = "MIC_IN", "Mic Jack",
+	                                "Mic Jack", "Mic Bias",
+	                                "Headphone Jack", "HP_OUT",
+	                                "LINE_IN", "Line In Jack";
+	        };
+
 
 		#include "fsl-imx8qm-device.dtsi"
 
@@ -220,30 +269,45 @@
 			reg = <0x0 0x5b270000 0x0 0x10000>;
 		};
 
-		edma01: dma-controller1@5a1f0000 {
-			compatible = "fsl,imx8qm-edma";
-			reg = <0x0 0x5a2e0000 0x0 0x10000>, /* channel14 UART1 rx */
-			      <0x0 0x5a2f0000 0x0 0x10000>; /* channel15 UART1 tx */
-			#dma-cells = <3>;
-			dma-channels = <2>;
-			interrupts = <GIC_SPI 436 IRQ_TYPE_LEVEL_HIGH>,
-				     <GIC_SPI 437 IRQ_TYPE_LEVEL_HIGH>;
-			interrupt-names = "edma0-chan14-rx", "edma0-chan15-tx";
-			status = "okay";
-		};
+                edma01: dma-controller1@5a1f0000 {
+                        compatible = "fsl,imx8qm-edma";
+                        reg = <0x0 0x5a2e0000 0x0 0x10000>, /* channel14 UART1 rx */
+                              <0x0 0x5a2f0000 0x0 0x10000>; /* channel15 UART1 tx */
+                        #dma-cells = <3>;
+                        dma-channels = <2>;
+                        interrupts = <GIC_SPI 436 IRQ_TYPE_LEVEL_HIGH>,
+                                     <GIC_SPI 437 IRQ_TYPE_LEVEL_HIGH>;
+                        interrupt-names = "edma0-chan14-rx", "edma0-chan15-tx";
+                        status = "okay";
+                };
+
+	        edma25: dma-controller@0x592e0000 {
+	                compatible = "fsl,imx8qm-adma";
+	                reg = <0x0 0x592e0000 0x0 0x10000>, /* sai1 rx */
+	                      <0x0 0x592f0000 0x0 0x10000>; /* sai1 tx */
+	                #dma-cells = <3>;
+	                shared-interrupt;
+	                dma-channels = <2>;
+	                interrupts = <GIC_SPI 317 IRQ_TYPE_LEVEL_HIGH>, /* sai1 */
+	                             <GIC_SPI 317 IRQ_TYPE_LEVEL_HIGH>;
+	                interrupt-names = "edma2-chan14-rx", "edma2-chan15-tx"; /* sai1 */
+	                fsl,sc_rsrc_id = <SC_R_DMA_2_CH14>,
+	                                 <SC_R_DMA_2_CH15>;
+	                status = "okay";
+	        };
 
                 xen_i2c0: xen_i2c@0 {
                         compatible = "xen,i2c";
                         be-adapter = "5a800000.i2c";
                         status = "okay";
                 };
-/*
+
                 xen_i2c1: xen_i2c@1 {
                         compatible = "xen,i2c";
                         be-adapter = "5a810000.i2c";
                         status = "okay";
                 };
-*/
+
                 xen_i2c2: xen_i2c@2 {
                         compatible = "xen,i2c";
                         be-adapter = "5a820000.i2c";
@@ -634,7 +698,7 @@
 };
 &gpio5 {
 	/delete-property/ power-domains;
-	status = "disabled";
+	status = "okay";
 };
 &gpio6 {
 	/delete-property/ power-domains;
@@ -712,7 +776,7 @@
 /delete-node/ &acm;
 /delete-node/ &esai0;
 /delete-node/ &spdif0;
-/delete-node/ &sai1;
+/* /delete-node/ &sai1;*/
 /delete-node/ &sai0;
 /delete-node/ &sai_hdmi_rx;
 /delete-node/ &sai_hdmi_tx;
@@ -816,6 +880,13 @@
 			>;
 		};
 
+                pinctrl_type_c: usbtypec {
+                        fsl,pins = <
+                                SC_P_SIM0_CLK_LSIO_GPIO0_IO00                   0x00000021
+                                SC_P_USDHC1_STROBE_LSIO_GPIO5_IO23              0x00000021
+                        >;
+                };
+
 		pinctrl_lvds1_lpi2c1: lvds1lpi2c1grp {
 			fsl,pins = <
 				SC_P_LVDS1_I2C1_SCL_LVDS1_I2C1_SCL	0xc600004c
@@ -845,6 +916,24 @@
                                 SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10               0x18300021
                         >;
                 };
+
+                pinctrl_sai1: sai1grp {
+                        fsl,pins = <
+                                SC_P_SAI1_RXD_AUD_SAI1_RXD                      0xc600004c
+                                SC_P_SAI1_TXC_AUD_SAI1_TXC                      0xc600004c
+                                SC_P_SAI1_TXD_AUD_SAI1_TXD                      0xc600004c
+                                SC_P_SAI1_TXFS_AUD_SAI1_TXFS                    0xc600004c
+                                SC_P_MCLK_OUT0_AUD_ACM_MCLK_OUT0                0xc600004c
+                        >;
+                };
+
+                pinctrl_hp_mic_detect: hp_mic_detect {
+                        fsl,pins = <
+                                SC_P_SIM0_IO_LSIO_GPIO0_IO02                    0x00000021
+                                SC_P_SIM0_GPIO0_00_LSIO_GPIO0_IO05              0x00000021
+                        >;
+                };
+
 	};
 };
 
@@ -969,7 +1058,7 @@
         };
 */
 };
-/*
+
 &xen_i2c1 {
         #address-cells = <1>;
         #size-cells = <0>;
@@ -1001,4 +1090,18 @@
                 status = "okay";
         };
 };
-*/
+
+&sai1 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_sai1>;
+	dmas = <&edma25 14 0 1>, <&edma25 15 0 0>;
+        assigned-clocks = <&clk IMX8QM_ACM_ESAI0_MCLK_SEL>,
+                          <&clk IMX8QM_AUD_PLL0_DIV>,
+                          <&clk IMX8QM_AUD_ACM_AUD_PLL_CLK0_DIV>,
+                          <&clk IMX8QM_AUD_ACM_AUD_REC_CLK0_DIV>,
+                          <&clk IMX8QM_AUD_ESAI_0_EXTAL_IPG>;
+        assigned-clock-parents = <&clk IMX8QM_AUD_ACM_AUD_PLL_CLK0_CLK>;
+        assigned-clock-rates = <0>, <786432000>, <49152000>, <24576000>, <49152000>;
+        status = "okay";
+};
+
