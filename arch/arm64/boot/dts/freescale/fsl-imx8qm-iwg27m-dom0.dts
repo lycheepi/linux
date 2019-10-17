@@ -157,6 +157,15 @@
 				SC_R_AUDIO_CLK_0
 				SC_R_AUDIO_PLL_1
 				SC_R_AUDIO_PLL_0
+				/* intmux_cm41 */
+				SC_R_M4_1_INTMUX
+				/* usbotg3 */
+                                SC_R_USB_2
+                                SC_R_USB_2_PHY
+				/* i2c1 */
+				SC_R_I2C_1
+				/* i2c2 */
+				SC_R_I2C_2
 				>;
                         /* Pads that will be transferred between M41 and AP */
                         pads-m41-ap = <
@@ -205,7 +214,7 @@
 				SC_P_SIM0_RST
 				/*SC_P_M41_I2C0_SCL_LSIO_GPIO0_IO10*/
 				SC_P_M41_I2C0_SCL
-				/* */
+				/* pinctrl_type_c */
 				SC_P_SIM0_CLK
 				SC_P_USDHC1_STROBE
 				/* pinctrl_hp_mic_detect */
@@ -217,6 +226,18 @@
 				SC_P_SAI1_TXD
 				SC_P_SAI1_TXFS
 				SC_P_MCLK_OUT0
+				/* usb otg 3*/
+				SC_P_USDHC1_RESET_B
+				SC_P_MIPI_DSI1_I2C0_SDA
+                                /*usbotgs typec */
+                                SC_P_QSPI1A_SS0_B
+                                SC_P_USB_SS3_TC3
+                                SC_P_QSPI1A_DATA0
+				/* i2c1 */
+				SC_P_GPT0_CLK
+				SC_P_GPT0_CAPTURE
+				SC_P_GPT1_CLK
+				SC_P_GPT1_CAPTURE
 				>;
                         gpios = <&gpio0 0 0>,
 				<&gpio0 1 0>,
@@ -225,9 +246,12 @@
 				<&gpio0 5 GPIO_ACTIVE_LOW>,
 				<&gpio0 10 0>,
 				<&gpio1 13 GPIO_ACTIVE_LOW>,
+				<&gpio1 21 GPIO_ACTIVE_HIGH>,
                                 <&gpio1 27 GPIO_ACTIVE_LOW>,
                                 <&gpio1 28 GPIO_ACTIVE_LOW>,
+				<&gpio4 3 GPIO_ACTIVE_LOW>,
                                 <&gpio4 6 GPIO_ACTIVE_LOW>,
+				<&gpio4 7 GPIO_ACTIVE_HIGH>,
                                 <&gpio4 9 GPIO_ACTIVE_LOW>,
                                 <&gpio4 11 GPIO_ACTIVE_HIGH>,
                                 <&gpio4 19 GPIO_ACTIVE_HIGH>,
@@ -381,7 +405,8 @@
 &smmu {
 	mmu-masters = <&dpu2 0x13>, <&dpu1 0x14>, <&gpu_3d1 0x15>,
 		      <&usdhc1 0x12>, <&usbotg1 0x11>,
-		      <&edma01 0x10>, <&edma20 0x9>;
+		      <&edma01 0x10>, <&edma20 0x9>,
+		      <&usbotg3 0x4>;
 };
 
 &lvds_region1 {
@@ -617,8 +642,14 @@
 
 &usbmisc1 {
 	/* Hack */
-	/delete-property/ reg;
+	xen,passthrough;
 	status = "disabled";
+};
+
+&usbmisc2 {
+        /* Hack */
+        xen,passthrough;
+        status = "disabled";
 };
 
 &usbphy1 {
@@ -627,7 +658,7 @@
 };
 
 &gpio0 {
-	xen,shared;
+	xen,passthrough;
 };
 
 &gpio1 {
@@ -666,6 +697,7 @@
 };
 
 &i2c1 {
+	xen,passthrough;
 	codec: sgtl5000@0a {
 		xen,passthrough;
 	};
@@ -675,6 +707,7 @@
 };
 
 &i2c2 {
+	xen,passthrough;
 	cst148@1a {
 		xen,passthrough;
 	};
@@ -684,5 +717,23 @@
 };
 
 &sai1 {
+	xen,passthrough;
+};
+
+&intmux_cm41 {
+        xen,passthrough;
+};
+
+&usbotg3_lpcg {
+        xen,passthrough;
+};
+
+&usbotg3 {
+        xen,passthrough;
+        #stream-id-cells = <1>;
+        iommus = <&smmu>;
+};
+
+&usbh1 {
 	xen,passthrough;
 };

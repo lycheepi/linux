@@ -87,7 +87,7 @@
 			gpio = <&gpio1 19 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
                 };
-
+/*
 		reg_usb_en: regulator-usb-en {
 			compatible = "regulator-fixed";
 			regulator-name = "usb_en";
@@ -97,7 +97,7 @@
 			gpio = <&gpio4 7 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
-
+*/
 		reg_3p3v: 3p3v {
 			compatible = "regulator-fixed";
 			regulator-name = "3P3V";
@@ -779,7 +779,7 @@
 &usbotg3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usbotg3>;
-	vusb-supply = <&reg_usb_en>;
+/*	vusb-supply = <&reg_usb_en>;*/
 	hub-reset-gpio = <&gpio1 21 GPIO_ACTIVE_HIGH>;
 	dr_mode = "host";
 	status = "okay";

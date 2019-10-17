@@ -246,6 +246,10 @@
 		reg = <0x0 0x5b270000 0x0 0x10000>;
 	};
 
+        usbotg3_lpcg: usbotg3_lpcg@5b280000 {
+                reg = <0x0 0x5b280000 0x0 0x1000>;
+        };
+
 	sdhc1_lpcg: sdhc1_lpcg@5b200000 {
 		compatible = "fsl,imx8qm-lpuart-lpcg";
 		reg = <0x0 0x5b200000 0x0 0x10000>;
@@ -290,6 +294,11 @@
 		compatible = "fsl,imx8qm-lpi2c2-lpcg";
                 reg = <0x0 0x5ac20000 0x0 0x1000>;
 	};
+
+        lpi2c_1_lpcg: lpcg@5ac10000 {
+                compatible = "fsl,imx8qm-lpi2c1-lpcg";
+                reg = <0x0 0x5ac10000 0x0 0x1000>;
+        };
 
 	dc_0_lpcg: lpcg@56010000 {
 		compatible = "fsl,imx8qm-dc0-lpcg";
@@ -367,6 +376,8 @@
 };
 
 /* /delete-node/ &edma0; */
+/delete-node/ &edma0;
+/delete-node/ &edma2;
 
 &mu {
 	interrupt-parent = <&gic>;
@@ -382,6 +393,11 @@
 
 &flexcan3 {
 	interrupt-parent = <&gic>;
+};
+
+&lpspi0 {
+        interrupt-parent = <&gic>;
+        dmas = <&edma0a 1 0 0>, <&edma0a 0 0 1>;
 };
 
 &lpuart0 {
@@ -406,6 +422,7 @@
 
 &lpuart4 {
 	interrupt-parent = <&gic>;
+	dmas = <&edma04 21 0 0>, <&edma04 20 0 1>;
 };
 
 &usdhc1 {
@@ -473,7 +490,32 @@
 			 <SC_R_DC_1>;
 };
 
+&esai0 {
+        dmas = <&edma21 6 0 1>, <&edma21 7 0 0>;
+};
+
+&spdif0 {
+        dmas = <&edma22 8 0 5>, <&edma22 9 0 4>;
+};
+
+&sai0 {
+        dmas = <&edma24 12 0 1>, <&edma24 13 0 0>;
+};
+
 &sai1 {
         dmas = <&edma25 14 0 1>, <&edma25 15 0 0>;
+};
+
+&sai_hdmi_rx {
+        dmas = <&edma26 18 0 1>;
+};
+
+&sai_hdmi_tx {
+        dmas = <&edma26 19 0 0>;
+};
+
+&asrc0 {
+        dmas = <&edma20 0 0 0>, <&edma20 1 0 0>, <&edma20 2 0 0>,
+               <&edma20 3 0 1>, <&edma20 4 0 1>, <&edma20 5 0 1>;
 };
 

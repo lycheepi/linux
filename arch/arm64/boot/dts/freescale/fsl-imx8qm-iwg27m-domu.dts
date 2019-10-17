@@ -241,6 +241,16 @@
 	                        regulator-always-on;
 	                };
 
+	                reg_usb_en: regulator-usb-en {
+	                        compatible = "regulator-fixed";
+	                        regulator-name = "usb_en";
+	                        regulator-min-microvolt = <1200000>;
+	                        regulator-max-microvolt = <1200000>;
+	                        regulator-type = "voltage";
+	                        gpio = <&gpio4 7 GPIO_ACTIVE_HIGH>;
+	                        enable-active-high;
+	                };
+
 	        };
 
 	        sound {
@@ -301,7 +311,7 @@
                         be-adapter = "5a800000.i2c";
                         status = "okay";
                 };
-
+/*
                 xen_i2c1: xen_i2c@1 {
                         compatible = "xen,i2c";
                         be-adapter = "5a810000.i2c";
@@ -313,7 +323,7 @@
                         be-adapter = "5a820000.i2c";
                         status = "okay";
                 };
-
+*/
 
 	};
 };
@@ -627,8 +637,8 @@
 
 /delete-node/ &camera;
 /delete-node/ &i2c0;
-/delete-node/ &i2c1;
-/delete-node/ &i2c2;
+/* /delete-node/ &i2c1;*/
+/* /delete-node/ &i2c2;*/
 /delete-node/ &i2c3;
 /delete-node/ &i2c4;
 /delete-node/ &i2c0_cm40;
@@ -752,17 +762,25 @@
 
 &usbmisc1 {
 	reg = <0x0 0x5b0d0200 0x0 0x200>;
+	status = "okay";
 };
 
-/delete-node/ &usbmisc2;
+&usbmisc2 {
+	reg = <0x0 0x5b0e0200 0x0 0x200>;
+	status = "okay";
+};
 
 &usbphy1 {
 	reg = <0x0 0x5b100000 0x0 0x200>;
+	status = "okay";
 };
 
 /delete-node/ &usbh1;
-/delete-node/ &usbotg3;
-/delete-node/ &usbphynop1;
+
+&usbphynop1 {
+        status = "okay";
+};
+
 /delete-node/ &usbphynop2;
 
 &usbotg1 {
@@ -798,8 +816,10 @@
 /delete-node/ &pciea;
 /delete-node/ &pcieb;
 /delete-node/ &sata;
-/*
+
 /delete-node/ &intmux_cm40;
+/delete-node/ &mu_rpmsg;
+/*
 /delete-node/ &intmux_cm41;
 */
 &rpmsg1{
@@ -874,11 +894,19 @@
 			>;
 		};
 
-		pinctrl_usbotg1: usbotg1 {
-			fsl,pins = <
-				SC_P_USB_SS3_TC0_CONN_USB_OTG1_PWR		0x00000021
-			>;
-		};
+                pinctrl_usbotg1: usbotg1 {
+                        fsl,pins = <
+                                SC_P_USB_SS3_TC0_LSIO_GPIO4_IO03                0x00000021
+                        >;
+                };
+
+                pinctrl_usbotg3: usbotg3 {
+                        fsl,pins = <
+                                SC_P_USDHC1_RESET_B_LSIO_GPIO4_IO07             0x00000021
+                                SC_P_MIPI_DSI1_I2C0_SDA_LSIO_GPIO1_IO21         0x00000021
+
+                        >;
+                };
 
                 pinctrl_type_c: usbtypec {
                         fsl,pins = <
@@ -934,6 +962,20 @@
                         >;
                 };
 
+                pinctrl_lpi2c1: lpi2c1grp {
+                        fsl,pins = <
+                                SC_P_GPT0_CLK_DMA_I2C1_SCL                      0xc600004c
+                                SC_P_GPT0_CAPTURE_DMA_I2C1_SDA                  0xc600004c
+                        >;
+                };
+
+                pinctrl_lpi2c2: lpi2c2grp {
+                        fsl,pins = <
+                                SC_P_GPT1_CLK_DMA_I2C2_SCL                      0xc600004c
+                                SC_P_GPT1_CAPTURE_DMA_I2C2_SDA                  0xc600004c
+                        >;
+                };
+
 	};
 };
 
@@ -949,14 +991,16 @@
 };
 
 &usbotg1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usbotg1>;
-	srp-disable;
-	hnp-disable;
-	adp-disable;
-	power-polarity-active-high;
-	disable-over-current;
-	status = "okay";
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_usbotg1>;
+        srp-disable;
+        hnp-disable;
+        adp-disable;
+        otg-pwr-gpio = <&gpio4 3 GPIO_ACTIVE_LOW>;
+        dr_mode = "otg";
+        power-polarity-active-high;
+        disable-over-current;
+        status = "disabled";
 };
 
 &i2c1_lvds1 {
@@ -1022,9 +1066,11 @@
         };
 };
 
-&xen_i2c2 {
+&i2c2 {
         #address-cells = <1>;
         #size-cells = <0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_lpi2c2>;
         clock-frequency = <400000>;
         status = "okay";
 
@@ -1058,10 +1104,46 @@
         };
 */
 };
-
+/*
 &xen_i2c1 {
         #address-cells = <1>;
         #size-cells = <0>;
+        clock-frequency = <400000>;
+        status = "okay";
+
+        codec: sgtl5000@0a {
+                compatible = "fsl,sgtl5000";
+                reg = <0x0a>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_hp_mic_detect>;
+                clocks = <&audioclk 0>;
+                VDDA-supply = <&reg_1p8v>;
+                VDDIO-supply = <&reg_1p8v>;
+                VDDD-supply = <&reg_1p5v>;
+                power-domains = <&pd_mclk_out0>;
+                hp-det-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+                mic-det-gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
+                status = "okay";
+        };
+
+        fusb30x@22 {
+                compatible = "fairchild,fusb302";
+                reg = <0x22>;
+                fairchild,int_n = <&gpio0 0 0>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_type_c>;
+                fairchild,cc = <&gpio5 23 0>;
+                status = "okay";
+        };
+};
+*/
+
+
+&i2c1 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_lpi2c1>;
         clock-frequency = <400000>;
         status = "okay";
 
@@ -1103,5 +1185,19 @@
         assigned-clock-parents = <&clk IMX8QM_AUD_ACM_AUD_PLL_CLK0_CLK>;
         assigned-clock-rates = <0>, <786432000>, <49152000>, <24576000>, <49152000>;
         status = "okay";
+};
+
+&intmux_cm41 {
+	status = "okay";
+};
+
+&usbotg3 {
+	interrupt-parent = <&gic>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_usbotg3>;
+        vusb-supply = <&reg_usb_en>;
+        hub-reset-gpio = <&gpio1 21 GPIO_ACTIVE_HIGH>;
+        dr_mode = "host";
+        status = "disabled";
 };
 
