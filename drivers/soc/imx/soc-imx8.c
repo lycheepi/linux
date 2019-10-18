@@ -389,7 +389,7 @@ static void __init imx8_iwg27m_usb(void)
 	struct device_node *np;
 	static int hub_rst_gpio;
 
-	np = of_find_node_by_path("/cdns3@5b110000");
+	np = of_find_node_by_path("/passthrough/cdns3@5b110000");
 	if (np)
 		hub_rst_gpio = of_get_named_gpio(np, "hub-reset-gpio", 0);
 	else

@@ -1372,7 +1372,7 @@
         vusb-supply = <&reg_usb_en>;
         hub-reset-gpio = <&gpio1 21 GPIO_ACTIVE_HIGH>;
         dr_mode = "host";
-        status = "disabled";
+        status = "okay";
 };
 
 &fec1 {

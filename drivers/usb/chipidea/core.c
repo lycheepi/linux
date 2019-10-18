@@ -537,7 +537,7 @@ static irqreturn_t ci_irq(int irq, void *data)
 		otgsc = hw_read_otgsc(ci, ~0);
 #ifdef CONFIG_IWG27M
                /* IWG27M: Configuring OTG Over Current GPIO based on OTG_ID */
-               np = of_find_node_by_path("/usb@5b0d0000");
+               np = of_find_node_by_path("/passthrough/usb@5b0d0000");
                if (np)
                        otg_pwr_gpio = of_get_named_gpio(np, "otg-pwr-gpio", 0);
                else
