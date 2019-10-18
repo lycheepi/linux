@@ -260,6 +260,12 @@
                 reg = <0x0 0x5b220000 0x0 0x10000>;
         };
 
+	enet0_lpcg: enet0_lpcg@5b230000 {
+                compatible = "fsl,imx8qm-enet0-lpcg";
+                reg = <0x0 0x5b230000 0x0 0x10000>;
+        };
+
+
 	lpuart1_lpcg: lpcg@5a470000 {
 		compatible = "fsl,imx8qm-lpuart-lpcg";
 		reg = <0x0 0x5a470000 0x0 0x10000>;

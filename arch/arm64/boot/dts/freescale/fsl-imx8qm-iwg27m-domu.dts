@@ -37,6 +37,7 @@
 		mmc2 = &usdhc3;
 		dpu0 = &dpu1;
 		dpu1 = &dpu2;
+		ethernet0 = &fec1;
 		dsi_phy0 = &mipi_dsi_phy1;
 		mipi_dsi0 = &mipi_dsi1;
 		ldb0 = &ldb1;
@@ -817,7 +818,6 @@
         reg = <0x0 0x5b030000 0x0 0x10000>;
 };
 
-/delete-node/ &fec1;
 /delete-node/ &fec2;
 
 &usbmisc1 {
@@ -1108,6 +1108,29 @@
                         >;
                 };
 
+                pinctrl_fec1: fec1grp {
+                        fsl,pins = <
+                                SC_P_ENET0_MDC_CONN_ENET0_MDC                   0x06000020
+                                SC_P_ENET0_MDIO_CONN_ENET0_MDIO                 0x06000020
+                                SC_P_ENET0_RGMII_TX_CTL_CONN_ENET0_RGMII_TX_CTL 0x06000020
+                                SC_P_ENET0_RGMII_TXC_CONN_ENET0_RGMII_TXC       0x06000020
+                                SC_P_ENET0_RGMII_TXD0_CONN_ENET0_RGMII_TXD0     0x06000020
+                                SC_P_ENET0_RGMII_TXD1_CONN_ENET0_RGMII_TXD1     0x06000020
+                                SC_P_ENET0_RGMII_TXD2_CONN_ENET0_RGMII_TXD2     0x06000020
+                                SC_P_ENET0_RGMII_TXD3_CONN_ENET0_RGMII_TXD3     0x06000020
+                                SC_P_ENET0_RGMII_RXC_CONN_ENET0_RGMII_RXC       0x06000020
+                                SC_P_ENET0_RGMII_RX_CTL_CONN_ENET0_RGMII_RX_CTL 0x06000020
+                                SC_P_ENET0_RGMII_RXD0_CONN_ENET0_RGMII_RXD0     0x06000020
+                                SC_P_ENET0_RGMII_RXD1_CONN_ENET0_RGMII_RXD1     0x06000020
+                                SC_P_ENET0_RGMII_RXD2_CONN_ENET0_RGMII_RXD2     0x06000020
+                                SC_P_ENET0_RGMII_RXD3_CONN_ENET0_RGMII_RXD3     0x06000020
+                                SC_P_ENET0_REFCLK_125M_25M_CONN_ENET0_REFCLK_125M_25M   0x06000020
+                                SC_P_PCIE_CTRL0_CLKREQ_B_LSIO_GPIO4_IO27        0x06000021
+                                SC_P_PCIE_CTRL1_CLKREQ_B_LSIO_GPIO4_IO30        0x06000021
+                                SC_P_PCIE_CTRL1_WAKE_B_LSIO_GPIO4_IO31          0x06000021
+                        >;
+                };
+
 	};
 };
 
@@ -1151,7 +1174,7 @@
         dr_mode = "otg";
         power-polarity-active-high;
         disable-over-current;
-        status = "disabled";
+        status = "okay";
 };
 
 &i2c1_lvds1 {
@@ -1350,5 +1373,34 @@
         hub-reset-gpio = <&gpio1 21 GPIO_ACTIVE_HIGH>;
         dr_mode = "host";
         status = "disabled";
+};
+
+&fec1 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_fec1>;
+        phy-mode = "rgmii";
+        phy-supply = <&reg_3p3v>;
+        phy-handle = <&ethphy0>;
+        phy-reset-gpios = <&gpio4 31 GPIO_ACTIVE_LOW>;
+        fsl,magic-packet;
+        fsl,rgmii_txc_dly;
+        fsl,rgmii_rxc_dly;
+        fsl,ar8031-phy-fixup;
+        fsl,mii-exclusive;
+        status = "okay";
+	/delete-property/ iommus;
+
+        mdio {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                ethphy0: ethernet-phy@0 {
+                        reg = <0x0>;
+                        compatible = "ethernet-phy-ieee802.3-c22";
+                        interrupts-extended = <&gpio4 27 IRQ_TYPE_LEVEL_LOW>;
+                        at803x,led-act-blind-workaround;
+                        at803x,eee-disabled;
+                        at803x,vddio-1p8v;
+                };
+        };
 };
 
