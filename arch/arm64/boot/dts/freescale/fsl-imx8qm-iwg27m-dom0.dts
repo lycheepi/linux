@@ -24,11 +24,13 @@
 		#address-cells = <2>;
 		#size-cells = <2>;
 
+		xen,xen-bootargs = "dtuart dtuart=ttyLP4,115200 earlycon=lpuart32,0x5a0a0000,115200 dom0_mem=1024M";
+		xen,dom0-bootargs = "console=ttyLP4,115200 earlycon=lpuart32,0x5a0a0000,115200 root=/dev/mmcblk1p2";
 		/* Could be updated by U-Boot */
 		module@0 {
-			bootargs = "earlycon=xen console=hvc0 loglevel=8 root=/dev/mmcblk1p2 rw  rootwait";
+			bootargs = "console=ttyLP4,115200 earlycon=lpuart32,0x5a0a0000,115200 root=/dev/mmcblk1p2";
 			compatible = "xen,linux-zimage", "xen,multiboot-module";
-			reg = <0x00000000 0x80a00000 0x00000000 0xf93a00>;
+			reg = <0x00000000 0x85000000 0x00000000 0x1302A00>;
                };
 	};
 
