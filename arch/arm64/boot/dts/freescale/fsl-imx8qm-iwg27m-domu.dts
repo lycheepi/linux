@@ -42,6 +42,7 @@
 		mipi_dsi0 = &mipi_dsi1;
 		ldb0 = &ldb1;
 		ldb1 = &ldb2;
+		usbphy0 = &usbphy1;
 		serial1 = &lpuart1;
 	};
 
@@ -723,14 +724,17 @@
 /delete-node/ &lpspi0;
 /delete-node/ &lpuart0;
 
-&lpuart1 {
-	/delete-property/ interrupt-parent;
+&lpuart1 { /* BT */
 	reg = <0x0 0x5a070000 0 0x1000>;
 	dmas = <&edma01 15 0 0>, <&edma01 14 0 1>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_lpuart1>;
-	status = "okay";
+	interrupt-parent = <&gic>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_lpuart1>;
+        device_type = "serial";
+        port-number = <1>;
+        status = "okay";
 };
+
 
 /delete-node/ &lpuart2;
 /delete-node/ &lpuart3;
@@ -809,15 +813,6 @@
 };
 
 /delete-node/ &usdhc2;
-/* /delete-node/ &usdhc3; */
-
-&usdhc3 {
-        compatible = "fsl,imx8qm-usdhc", "fsl,imx6sl-usdhc";
-        /*interrupt-parent = <&gic>;*/
-        /delete-property/ interrupt-parent;
-        reg = <0x0 0x5b030000 0x0 0x10000>;
-};
-
 /delete-node/ &fec2;
 
 &usbmisc1 {
@@ -845,7 +840,7 @@
 
 &usbotg1 {
 	reg = <0x0 0x5b0d0000 0x0 0x200>;
-	/delete-property/ interrupt-parent;
+	interrupt-parent = <&gic>;
 };
 
 /delete-node/ &ddr_pmu0;
@@ -865,7 +860,7 @@
         dmas = <&edma21 6 0 1>, <&edma21 7 0 0>;
         dma-names = "rx", "tx";
         power-domains = <&pd_esai0>;
-        status = "okay";
+        status = "disabled";
 };
 
 
@@ -998,15 +993,14 @@
 			>;
 		};
 
-		pinctrl_lpuart1: lpuart1grp {
-			fsl,pins = <
-				SC_P_UART1_RX_DMA_UART1_RX		0x06000020
-				SC_P_UART1_TX_DMA_UART1_TX		0x06000020
-				SC_P_UART1_CTS_B_DMA_UART1_CTS_B	0x06000020
-				SC_P_UART1_RTS_B_DMA_UART1_RTS_B	0x06000020
-				SC_P_QSPI1A_DQS_LSIO_GPIO4_IO22		0x00000021
-			>;
-		};
+                pinctrl_lpuart1: lpuart1grp {
+                        fsl,pins = <
+                                SC_P_UART1_RX_DMA_UART1_RX                      0x06000020
+                                SC_P_UART1_TX_DMA_UART1_TX                      0x06000020
+                                SC_P_UART1_CTS_B_DMA_UART1_CTS_B                0x06000020
+                                SC_P_UART1_RTS_B_DMA_UART1_RTS_B                0x06000020
+                        >;
+                };
 
                 pinctrl_mipi_dsi: mipidsi {
                         fsl,pins = <
@@ -1145,8 +1139,17 @@
 	status = "okay";
 };
 
+/*
+&usdhc3 {
+        compatible = "fsl,imx8qm-usdhc", "fsl,imx6sl-usdhc";
+        interrupt-parent = <&gic>;
+        /delete-property/ interrupt-parent;
+        reg = <0x0 0x5b030000 0x0 0x10000>;
+};*/
+
 &usdhc3 {
 	/delete-property/ iommus;
+	interrupt-parent = <&gic>;
         pinctrl-names = "default","state_100mhz", "state_200mhz";
         pinctrl-0 = <&pinctrl_usdhc3>, <&pinctrl_usdhc3_gpio>;
         pinctrl-1 = <&pinctrl_usdhc3_100mhz>, <&pinctrl_usdhc3_gpio>;

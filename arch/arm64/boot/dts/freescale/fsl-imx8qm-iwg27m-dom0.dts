@@ -215,7 +215,6 @@
 				SC_P_UART1_TX
 				SC_P_UART1_CTS_B
 				SC_P_UART1_RTS_B
-				SC_P_QSPI1A_DQS
 				/* mipi dsi 1 */
 				/* SC_P_SIM0_PD_LSIO_GPIO0_IO03*/
 				SC_P_SIM0_PD
@@ -686,12 +685,6 @@
 	iommus = <&smmu>;
 };
 
-&usdhc3 {
-        xen,passthrough;
-        #stream-id-cells = <1>;
-        iommus = <&smmu>;
-};
-
 &fec1 {
         xen,passthrough;
         #stream-id-cells = <1>;
@@ -814,6 +807,8 @@
 
 &usdhc3 {
 	xen,passthrough;
+	#stream-id-cells = <1>;
+        iommus = <&smmu>;
 	wilc_sdio {
 		xen,passthrough;
 	};
