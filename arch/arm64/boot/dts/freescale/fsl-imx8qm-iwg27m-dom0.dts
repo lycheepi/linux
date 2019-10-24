@@ -134,7 +134,6 @@
 				SC_R_MIPI_1_I2C_0
 				SC_R_MIPI_1_I2C_1
 				SC_R_MIPI_1_PWM_0
-				SC_R_HDMI
 				SC_R_HDMI_I2C_0
 				SC_R_SDHC_0
 				SC_R_USB_0
@@ -176,6 +175,17 @@
                                 SC_R_DMA_2_CH7
 				/* fec 1*/
 				SC_R_ENET_0
+				/* hdmi */
+				SC_R_HDMI
+				SC_R_HDMI_I2S
+				SC_R_HDMI_PLL_1
+				SC_R_HDMI_PLL_0
+				/* sai 4 - hdmi */
+				SC_R_SAI_4
+				SC_R_DMA_2_CH18
+				/* sai 5 */
+				SC_R_SAI_5
+				SC_R_DMA_2_CH19				
 				>;
                         /* Pads that will be transferred between M41 and AP */
                         pads-m41-ap = <
@@ -439,7 +449,9 @@
                          <SC_R_DMA_2_CH12>,
                          <SC_R_DMA_2_CH13>,
 			 <SC_R_DMA_2_CH14>,
-			 <SC_R_DMA_2_CH15>;
+			 <SC_R_DMA_2_CH15>,
+			 <SC_R_DMA_2_CH18>,
+			 <SC_R_DMA_2_CH19>;
 };
 
 &edma21 {
@@ -454,12 +466,16 @@
 	xen,passthrough;
 };
 
+&edma26 {
+        xen,passthrough;
+};
+
 /* SMMU */
 &smmu {
 	mmu-masters = <&dpu2 0x13>, <&dpu1 0x14>, <&gpu_3d1 0x15>,
 		      <&usdhc1 0x12>, <&usbotg1 0x11>,
 		      <&edma01 0x10>, <&edma20 0x9>, <&usdhc3 0x8>,
-		      <&fec1 0x7>, <&usbotg3 0x4>;
+		      <&fec1 0x7>, <&hdmi 0x6>, <&usbotg3 0x4>;
 };
 
 &lvds_region1 {
@@ -860,3 +876,29 @@
 &pcieb{
 	xen,passthrough;
 };
+
+&sai_hdmi_tx {
+	xen,passthrough;
+};
+
+&hdmi {
+	xen,passthrough;
+        #stream-id-cells = <1>;
+        iommus = <&smmu>;
+        /*fsl,sc_rsrc_id = <SC_R_HDMI>,
+                         <SC_R_HDMI_RX>;*/
+};
+
+&irqsteer_hdmi {
+	xen,passthrough;
+};
+
+&aud_hdmi_tx_sai_0_lpcg {
+	xen,passthrough;
+};
+
+&di_hdmi_lpcg {
+	xen,passthrough;
+};
+
+

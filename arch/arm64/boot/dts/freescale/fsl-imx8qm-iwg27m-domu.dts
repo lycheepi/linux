@@ -267,6 +267,14 @@
 	                                "LINE_IN", "Line In Jack";
 	        };
 
+	        sound_hdmi: sound-hdmi {
+	                compatible = "fsl,imx-audio-cdnhdmi";
+	                model = "imx-audio-hdmi";
+	                audio-cpu = <&sai_hdmi_tx>;
+	                constraint-rate = <48000>;
+	                protocol = <1>;
+        	        status = "disabled";
+	        };
 
 		#include "fsl-imx8qm-device.dtsi"
 
@@ -357,6 +365,21 @@
 	                interrupt-names = "edma2-chan14-rx", "edma2-chan15-tx"; /* sai1 */
 	                fsl,sc_rsrc_id = <SC_R_DMA_2_CH14>,
 	                                 <SC_R_DMA_2_CH15>;
+	                status = "okay";
+	        };
+
+	        edma26: dma-controller@0x59320000 {
+	                compatible = "fsl,imx8qm-adma";
+	                reg = <0x0 0x59320000 0x0 0x10000>, /* sai4 rx */
+	                      <0x0 0x59330000 0x0 0x10000>; /* sai5 tx */
+	                #dma-cells = <3>;
+	                shared-interrupt;
+	                dma-channels = <2>;
+	                interrupts = <GIC_SPI 326 IRQ_TYPE_LEVEL_HIGH>, /* sai4 */
+	                             <GIC_SPI 328 IRQ_TYPE_LEVEL_HIGH>; /* sai5 */
+	                interrupt-names = "edma2-chan18-rx", "edma2-chan19-tx"; /* sai1 */
+	                fsl,sc_rsrc_id = <SC_R_DMA_2_CH18>,
+	                                 <SC_R_DMA_2_CH19>;
 	                status = "okay";
 	        };
 
@@ -475,11 +498,15 @@
         status = "okay";
 
         dpu1_disp0: port@0 {
+		reg = <0>;
 
 		dpu1_disp0_hdmi: hdmi-endpoint {
-			/delete-property/ remote-endpoint;
+			remote-endpoint = <&hdmi_disp>;
 		};
 
+		dpu1_disp0_mipi_dsi: mipi-dsi-endpoint {
+			remote-endpoint = <&mipi_dsi1_in>;
+		};
         };
         dpu1_disp1: port@1 {
                 reg = <1>;
@@ -697,7 +724,6 @@
 /delete-node/ &i2c4;
 /delete-node/ &i2c0_cm40;
 /delete-node/ &i2c0_cm41;
-/* /delete-node/ &irqsteer_hdmi;*/
 /delete-node/ &i2c0_hdmi;
 
 &irqsteer_lvds1 {
@@ -868,7 +894,6 @@
 /* /delete-node/ &sai1;*/
 /delete-node/ &sai0;
 /delete-node/ &sai_hdmi_rx;
-/delete-node/ &sai_hdmi_tx;
 /delete-node/ &sai6;
 /delete-node/ &sai7;
 /delete-node/ &amix;
@@ -1407,3 +1432,25 @@
         };
 };
 
+&sai_hdmi_tx {
+	dmas = <&edma26 19 0 0>;
+        assigned-clocks = <&clk IMX8QM_ACM_HDMI_TX_SAI0_MCLK_SEL>,
+                          <&clk IMX8QM_AUD_PLL1_DIV>,
+                          <&clk IMX8QM_AUD_ACM_AUD_PLL_CLK1_DIV>,
+                          <&clk IMX8QM_AUD_ACM_AUD_REC_CLK1_DIV>,
+                          <&clk IMX8QM_AUD_SAI_HDMITX0_MCLK>;
+        assigned-clock-parents = <&clk IMX8QM_AUD_ACM_AUD_PLL_CLK1_CLK>;
+        assigned-clock-rates = <0>, <768000000>, <768000000>, <768000000>, <768000000>;
+        fsl,sai-asynchronous;
+        status = "okay";
+};
+
+&hdmi {
+        pinctrl-names = "default";
+        compatible = "fsl,imx8qm-hdmi";
+        status = "disabled";
+};
+
+&irqsteer_hdmi {
+	status = "okay";
+};

@@ -1,0 +1,62 @@
+/*
+ * Copyright 2018 NXP
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "fsl-imx8qm-iwg27m-domu.dts"
+
+/ {
+        passthrough {
+                /*
+                sound-hdmi-tx {
+                        compatible = "fsl,imx-audio-cdnhdmi";
+                        model = "imx-audio-hdmi-tx";
+                        audio-cpu = <&sai_hdmi_tx>;
+                        constraint-rate = <48000>;
+                        protocol = <1>;
+                        hdmi-out;
+                };
+
+                sound-amix-sai {
+                        status = "disabled";
+                };
+
+                sound-hdmi-arc {
+                        compatible = "fsl,imx-audio-spdif";
+                        model = "imx-hdmi-arc";
+                        spdif-controller = <&spdif1>;
+                        spdif-in;
+                        spdif-out;
+                };
+                */
+        };
+};
+
+&hdmi {
+	status = "okay";
+};
+
+&sound_hdmi {
+	status = "disabled";
+};
+
+&mipi_dsi_phy1 {
+        status = "disabled";
+};
+
+&mipi_dsi1 {
+        status = "disabled";
+};
+
+&mipi_dsi_bridge1 {
+        status = "disabled";
+};

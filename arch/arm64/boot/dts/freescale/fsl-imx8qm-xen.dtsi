@@ -392,6 +392,11 @@
         aud_sai_1_lpcg: aud_sai_1_lpcg {
                 reg = <0x0 0x59450000 0x0 0x1000>;
         };
+
+        aud_hdmi_tx_sai_0_lpcg: aud_hdmi_tx_sai_0_lpcg {
+                reg = <0x0 0x59490000 0x0 0x1000>;
+        };
+
 };
 
 /* /delete-node/ &edma0; */
